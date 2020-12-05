@@ -16,6 +16,7 @@ If you are into programming, logic, maybe also a little into competition, this o
 |  2 |Password Philosophy               |Category "parse, validate & count" - easily done.|
 |  3 |Toboggan Trajectory               |The first map grid puzzle of 2020, but IMHO not a very beautiful one.|
 |  4 |Passport Processing               |A puzzle full of text processing and arbitrary checks on data...|
+|  5 |Binary Boarding                   |Turns out to be *VERY* simpel. Map a string to binary 0/1 and answer some questions about it| 
 
 ## My logbook of 2020
 
@@ -76,3 +77,19 @@ passports were simply blank lines and line breaks themselves delimit nothing.
 
 The aftermath of this puzzle led me to transform the validation mechanism into a validator map with keys (the field
 names) and a corresponding lambda expression for the validation work. This at least looks quite nice.
+
+### Day 5: Binary Boarding
+Hell, was I dumb in the morning. It looked deceivingly simple at first, then got awkward doing it manually and an hour
+later it all crumbled to *very* simple again.
+
+First mistake: I probably mixed up the Fs and Bs and did it the wrong way. That's why I then turned to do the binary
+translation manually with a fold command, folding a range of 0..127 down to the single digit.
+For part 2, I again overdid it by a lot! I understood the question differently: look for the first full-seated row
+(seats 0 through 7), followed by a row with one free seat, followed by another full-seated row. This worked. But hey:
+Eric clearly stated: "ID-1 and ID+1 is taken" No word about the complete row in front and behind.
+
+An hour later, everything got clear. The whole row/column definition was a scam. All this was: Fs are 0, Ls are 0, 
+the rest is a 1. Take that string, interpret it as a binary number. Do that for all the boarding passes.
+
+Then answer the question: which is the highest id? And in the range of the lowest to the highest, which single one
+is missing - that's our seat. Done.
