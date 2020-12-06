@@ -16,7 +16,8 @@ If you are into programming, logic, maybe also a little into competition, this o
 |  2 |Password Philosophy               |Category "parse, validate & count" - easily done.|
 |  3 |Toboggan Trajectory               |The first map grid puzzle of 2020, but IMHO not a very beautiful one.|
 |  4 |Passport Processing               |A puzzle full of text processing and arbitrary checks on data...|
-|  5 |Binary Boarding                   |Turns out to be *VERY* simpel. Map a string to binary 0/1 and answer some questions about it| 
+|  5 |Binary Boarding                   |Turns out to be *VERY* simple. Map a string to binary 0/1 and answer some questions about it|
+|  6 |Custom Customs                    |Whoop, whoop, simple one again. What is Eric doing?| 
 
 ## My logbook of 2020
 
@@ -93,3 +94,10 @@ the rest is a 1. Take that string, interpret it as a binary number. Do that for 
 
 Then answer the question: which is the highest id? And in the range of the lowest to the highest, which single one
 is missing - that's our seat. Done.
+
+### Day 6: Custom Customs
+Alright, another simple challenge. Mixing day 4's splitting by empty lines, all this puzzle wanted to teach us is the 
+difference between a union and an intersection of characters?!? This is underwhelming to say the least.
+
+In other years, the level had been much higher on a weekend day 6...
+It's bed time - again! Good night.
