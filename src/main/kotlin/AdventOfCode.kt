@@ -97,7 +97,7 @@ abstract class Day(val day: Int, private val year: Int = 2020, val title: String
         header
         println("=== $type input data ${"=".repeat(50 - type.length - 4 - 12)}")
         val idxWidth = lastIndex.toString().length
-        preview { idx, data ->
+        preview() { idx, data ->
             val original = rawInput.getOrNull(idx)
             val s = when {
                 rawInput.size != this.size -> "$data"

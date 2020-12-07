@@ -16,8 +16,9 @@ If you are into programming, logic, maybe also a little into competition, this o
 |  2 |Password Philosophy               |Category "parse, validate & count" - easily done.|
 |  3 |Toboggan Trajectory               |The first map grid puzzle of 2020, but IMHO not a very beautiful one.|
 |  4 |Passport Processing               |A puzzle full of text processing and arbitrary checks on data...|
-|  5 |Binary Boarding                   |Turns out to be *VERY* simple. Map a string to binary 0/1 and answer some questions about it|
+|  5 |Binary Boarding                   |Turns out to be *VERY* simple. Map a string to binary 0/1 and answer some questions about it.|
 |  6 |Custom Customs                    |Whoop, whoop, simple one again. What is Eric doing?| 
+|  7 |Handy Haversacks                  |Bags inside bags, inside bags. Challenge deals with clean parsing and recursive search.|
 
 ## My logbook of 2020
 
@@ -100,4 +101,11 @@ Alright, another simple challenge. Mixing day 4's splitting by empty lines, all 
 difference between a union and an intersection of characters?!? This is underwhelming to say the least.
 
 In other years, the level had been much higher on a weekend day 6...
-It's bed time - again! Good night.
+It's bedtime - again! Good night.
+
+### Day 7: Handy Haversacks
+At first, the parsing of the rules looks challenging, but one approach I took is to split by the triggering key word
+"bag(s)" to get columns of 1. the outer bag color plus a list of contained bag colors. Drop the word "contain " and 
+don't forget to treat "no" as 0 - contains nothing.
+
+The two questions about the data structure of bags within bags are quite trivial recursive counts and adds.
