@@ -64,8 +64,8 @@ abstract class Day(val day: Int, private val year: Int = 2020, val title: String
     fun <T> mappedInput(lbd: (String) -> T): List<T> =
         rawInput.map(catchingMapper(lbd)).show("Mapped")
 
-    fun <T> parsedInput(lbd: ParserContext.(String) -> T): List<T> =
-        rawInput.map(parsingMapper(lbd)).show("Parsed")
+    fun <T> parsedInput(columnSeparator: Regex = Regex("\\s+"), lbd: ParserContext.(String) -> T): List<T> =
+        rawInput.map(parsingMapper(columnSeparator, lbd)).show("Parsed")
 
     fun <T> matchedInput(regex: Regex, lbd: (List<String>) -> T): List<T> =
         rawInput.map(matchingMapper(regex, lbd)).show("Matched")
@@ -82,34 +82,29 @@ abstract class Day(val day: Int, private val year: Int = 2020, val title: String
         runWithTiming(2) { part2 }
     }
 
-    fun <T> T.show(prompt: String = ""): T {
+    fun <T> T.show(prompt: String = "", maxLines: Int = 10): T {
         if (!verbose) return this
         header
         if (this is List<*>)
-            this.show(prompt)
+            this.show(prompt, maxLines)
         else
             println("$prompt: $this")
         return this
     }
 
-    private fun <T : Any?> List<T>.show(type: String): List<T> {
+    private fun <T : Any?> List<T>.show(type: String, maxLines: Int = 10): List<T> {
         if (!verbose) return this
         header
         println("=== $type input data ${"=".repeat(50 - type.length - 4 - 12)}")
         val idxWidth = lastIndex.toString().length
-        preview() { idx, data ->
+        preview(maxLines) { idx, data ->
             val original = rawInput.getOrNull(idx)
             val s = when {
                 rawInput.size != this.size -> "$data"
-                original != "$data" -> "${
-                    original.paddedTo(
-                        20,
-                        20
-                    )
-                } => $data"
+                original != "$data" -> "${original.paddedTo(40, 40)} => $data"
                 else -> original
             }
-            println("${idx.toString().padStart(idxWidth)}: ${s.paddedTo(0, 140)}")
+            println("${idx.toString().padStart(idxWidth)}: ${s.paddedTo(0, 160)}")
         }
         println("=".repeat(50))
         return this
@@ -126,11 +121,13 @@ abstract class Day(val day: Int, private val year: Int = 2020, val title: String
             runCatching { lbd(s) }.getOrElse { error("Exception when mapping \"$s\" - $it") }
         }
 
-        private fun <T> parsingMapper(lbd: ParserContext.(String) -> T): (String) -> T = { s ->
-            runCatching { ParserContext(s).lbd(s) }.getOrElse { error("Exception when parsing \"$s\" - $it") }
+        private fun <T> parsingMapper(columnSeparator: Regex, lbd: ParserContext.(String) -> T): (String) -> T = { s ->
+            runCatching {
+                ParserContext(columnSeparator, s).lbd(s)
+            }.getOrElse { error("Exception when parsing \"$s\" - $it") }
         }
 
-        private fun <T> List<T>.preview(maxLines: Int = 7, f: (idx: Int, data: T) -> Unit) {
+        private fun <T> List<T>.preview(maxLines: Int, f: (idx: Int, data: T) -> Unit) {
             if (size <= maxLines) {
                 forEachIndexed(f)
             } else {
@@ -152,46 +149,34 @@ abstract class Day(val day: Int, private val year: Int = 2020, val title: String
 }
 
 @Suppress("unused")
-class ParserContext(private val line: String) {
-    val cols: List<String> by lazy { line.split("\\s+".toRegex()) }
+class ParserContext(private val columnSeparator: Regex, private val line: String) {
+    val cols: List<String> by lazy { line.split(columnSeparator) }
+    val nonEmptyCols: List<String> by lazy { cols.filter { it.isNotEmpty() } }
+    val nonBlankCols: List<String> by lazy { cols.filter { it.isNotBlank() } }
     val ints: List<Int> by lazy { line.extractAllIntegers() }
     val longs: List<Long> by lazy { line.extractAllLongs() }
-    fun columnsBy(separator: Regex) = line.split(separator)
 }
 
 private fun String.extractInt() = toIntOrNull() ?: sequenceContainedIntegers().first()
 private fun String.extractLong() = toLongOrNull() ?: sequenceContainedLongs().first()
 
-private val numberPattern = "(-+)?\\d+".toRegex().toPattern()
+private val numberRegex = Regex("(-+)?\\d+")
 
-fun String.sequenceContainedIntegers(): Sequence<Int> {
-    val numberMatcher = numberPattern.matcher(this)
-    return sequence {
-        while (numberMatcher.find()) {
-            numberMatcher.group(0).let { group ->
-                group.toIntOrNull()?.apply { yield(this) } ?: warn { "Number too large for Int: $group" }
-            }
-        }
-    }
-}
+fun String.sequenceContainedIntegers(): Sequence<Int> =
+    numberRegex.findAll(this)
+        .mapNotNull { m -> m.value.toIntOrNull() ?: warn("Number too large for Int: ${m.value}") }
 
-fun String.sequenceContainedLongs(): Sequence<Long> {
-    val numberMatcher = numberPattern.matcher(this)
-    return sequence {
-        while (numberMatcher.find()) {
-            numberMatcher.group(0).let { group ->
-                group.toLongOrNull()?.apply { yield(this) } ?: warn { "Number too large for Long: $group" }
-            }
-        }
-    }
+fun String.sequenceContainedLongs(): Sequence<Long> =
+    numberRegex.findAll(this)
+        .mapNotNull { m -> m.value.toLongOrNull() ?: warn("Number too large for Long: ${m.value}") }
+
+private fun <T> warn(msg: String): T? {
+    println("WARNING: $msg")
+    return null
 }
 
 fun String.extractAllIntegers(): List<Int> = sequenceContainedIntegers().toList()
 fun String.extractAllLongs(): List<Long> = sequenceContainedLongs().toList()
-
-private fun warn(msg: () -> String) {
-    println("WARNING: ${msg()}")
-}
 
 private fun Any?.paddedTo(minWidth: Int, maxWidth: Int) = with(this.toString()) {
     when {
@@ -229,6 +214,29 @@ object AoC {
         connection.getInputStream().bufferedReader().useLines { result.addAll(it) }
         return result
     }
+
+//    // not working yet
+//    fun submitAnswer(day: Int, year: Int, level: Int, answer: Any?): List<String> {
+//        println("Submitting answer for $year, day $day...")
+//        val uri = "https://adventofcode.com/$year/day/$day/answer"
+//        val cookies = mapOf("session" to getSessionCookie())
+//
+//        val payload = """{ "level": $level, "answer": \"$answer\" }"""
+//
+//        val url = URL(uri)
+//        val result = mutableListOf<String>()
+//        with(url.openConnection() as HttpURLConnection) {
+//            requestMethod = "POST"
+//            setRequestProperty(
+//                "Cookie", cookies.entries.joinToString(separator = "; ") { (k, v) -> "$k=$v" }
+//            )
+//            setRequestProperty("Accept", "application/json")
+//            doOutput = true
+//            outputStream.bufferedWriter().use { it.write(payload) }
+//            inputStream.bufferedReader().useLines { result.addAll(it) }
+//        }
+//        return result
+//    }
 
     private fun getSessionCookie() =
         System.getenv("AOC_COOKIE")
