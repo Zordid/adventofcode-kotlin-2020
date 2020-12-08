@@ -19,6 +19,7 @@ If you are into programming, logic, maybe also a little into competition, this o
 |  5 |Binary Boarding                   |Turns out to be *VERY* simple. Map a string to binary 0/1 and answer some questions about it.|
 |  6 |Custom Customs                    |Whoop, whoop, simple one again. What is Eric doing?| 
 |  7 |Handy Haversacks                  |Bags inside bags, inside bags. Challenge deals with clean parsing and recursive search.|
+|  8 |Handheld Halting                  |Finally, we got a CPU emulator in 2020. Quite primitive, but still!|
 
 ## My logbook of 2020
 
@@ -109,3 +110,12 @@ At first, the parsing of the rules looks challenging, but one approach I took is
 don't forget to treat "no" as 0 - contains nothing.
 
 The two questions about the data structure of bags within bags are quite trivial recursive counts and adds.
+
+### Day 8: Handheld Halting
+The first CPU emulator of 2020, very simple, which knows only 3 instructions.
+- `acc` to modify the only accumulator register (by adding the operand)
+- `jmp` to jump unconditionally
+- `nop` to simply do nothing
+
+Part 1 needs to trace the instructions executed and stop the machine once an instruction is hit for the second time.
+Part 2 asks to find a single instruction to flip between jmp and nop to make the program exit normally.

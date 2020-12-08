@@ -258,3 +258,5 @@ object AoC {
     private fun fileNameFor(day: Int, year: Int) = "${pathNameForYear(year)}/day${"%02d".format(day)}.txt"
 
 }
+
+val pass = Unit
