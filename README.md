@@ -119,3 +119,12 @@ The first CPU emulator of 2020, very simple, which knows only 3 instructions.
 
 Part 1 needs to trace the instructions executed and stop the machine once an instruction is hit for the second time.
 Part 2 asks to find a single instruction to flip between jmp and nop to make the program exit normally.
+
+### Day 9: Encoding Error
+A nice, little puzzle involving a sequence of numbers that need to be summed in certain ways.
+Using the combinations fun from day 1, it was quite nice to determine a check function for part 1. And the 25 numbers
+in front of the number to check can easily be derived by the Kotlin fun `windowed` which generates 26-number-windows to
+check out of the box.
+In part 2 a sequence of continuous numbers needs to be found that sums up to part 1's solution.
+In my cleaner version, a running fold operation produces a sequence of min/max/sum triples starting at a given position
+which can be taken until the summed value is greater than the target. 
