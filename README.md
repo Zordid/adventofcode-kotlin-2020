@@ -159,7 +159,7 @@ would fit.
 For the 1-jolt gaps, you can look at it like this: how many ways are there to "hop through" the gaps when the maximum
 step size is 3? For example: 1-1-1 has 4 possible ways to get through: a single 3-jolt hop, 2 - 1, 1 - 2 or 1 - 1 - 1 
 
-So the answer to the overall paths possible is the product of all 1-jolt gap runs possibilities (broken by any amount 
+So the answer to the overall paths possible is the product of all 1-jolt gap runs' possibilities (broken by any amount 
 of 3-jolt gaps)!
 How many are there: turns out, this is the number of compositions of the length as a sum of the values 1, 2 and 3! In math
-this is called an A-restricted composition!
+this is called an [A-restricted composition](https://en.wikipedia.org/wiki/Composition_(combinatorics)).
