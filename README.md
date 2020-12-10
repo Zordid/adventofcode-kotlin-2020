@@ -20,6 +20,8 @@ If you are into programming, logic, maybe also a little into competition, this o
 |  6 |Custom Customs                    |Whoop, whoop, simple one again. What is Eric doing?| 
 |  7 |Handy Haversacks                  |Bags inside bags, inside bags. Challenge deals with clean parsing and recursive search.|
 |  8 |Handheld Halting                  |Finally, we got a CPU emulator in 2020. Quite primitive, but still!|
+|  9 |Encoding Error                    |Handling of a bunch of numbers with attributes to check.|
+| 10 |Adapter Array                     |Part 2 turns out to be the hardest puzzle so far! It's not about path finding...|
 
 ## My logbook of 2020
 
@@ -128,3 +130,36 @@ check out of the box.
 In part 2 a sequence of continuous numbers needs to be found that sums up to part 1's solution.
 In my cleaner version, a running fold operation produces a sequence of min/max/sum triples starting at a given position
 which can be taken until the summed value is greater than the target. 
+
+### Day 10: Adapter Array
+This one got me! I immediately had a path finding algorithm in my head when I speed-read through part 1 - but that
+turned out to be fatal...
+We have a number of "jolt" values for adapter ratings given. Each adapter can be plugged into a predecessor adapter
+with a rating 1 through 3 lower than its own. 
+What I did not get, was the part clearly stating that *all* adapters have to be used for part 1. So, basically sorting
+the given values and adding a "0 rating" to the front (the outlet) and a final "max+3 rating" (the device) to the end
+and then getting the differences (gaps!) between them was all.
+Simply a one-liner!
+
+`
+val gaps = (adapters + listOf(0, adapters.maxOrNull()!! + 3)).sorted().windowed(size = 2, step = 1).map { it[1] - it[0] }
+`
+
+for all the gaps and a `gaps.count { it == 1 } * gaps.count { it == 3 }` for the solution!
+I did not see that for over half an hour, trying to get my path finding algorithm to work. Sad.
+
+Part 2 though was a math challenge. How many combinations are there to use the adapters (not necessarily all!)?
+Looking at the gaps and having part 1 in mind revealed the pattern that there are only 1-jolt and 3-jolt gaps.
+
+Let's make this thought experience:
+
+If we had *only* 3-jolt gaps, there would be only one "path" of adapters from 0 to the end. No other adapter in-between
+would fit.
+
+For the 1-jolt gaps, you can look at it like this: how many ways are there to "hop through" the gaps when the maximum
+step size is 3? For example: 1-1-1 has 4 possible ways to get through: a single 3-jolt hop, 2 - 1, 1 - 2 or 1 - 1 - 1 
+
+So the answer to the overall paths possible is the product of all 1-jolt gap runs possibilities (broken by any amount 
+of 3-jolt gaps)!
+How many are there: turns out, this is the number of compositions of the length as a sum of the values 1, 2 and 3! In math
+this is called an A-restricted composition!

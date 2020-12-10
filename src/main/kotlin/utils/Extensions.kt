@@ -90,11 +90,80 @@ fun <T> Iterable<T>.asEndlessSequence() = sequence { while (true) yieldAll(this@
 
 fun <K, V> Map<K, V>.flip(): Map<V, K> = map { it.value to it.key }.toMap()
 
-fun Iterable<Int>.product(): Int =
-    productAsLong().let {
-        check(it <= Int.MAX_VALUE) { "Product overflows Int range: $it" }
-        it.toInt()
-    }
-
 fun Iterable<Long>.product(): Long = reduce(Long::times)
+fun Sequence<Long>.product(): Long = reduce(Long::times)
 fun Iterable<Int>.productAsLong(): Long = fold(1L, Long::times)
+fun Sequence<Int>.productAsLong(): Long = fold(1L, Long::times)
+fun Iterable<Int>.product(): Int = productAsLong().checkedToInt()
+fun Sequence<Int>.product(): Int = productAsLong().checkedToInt()
+
+fun Long.checkedToInt(): Int = let {
+    check(it in Int.MIN_VALUE..Int.MAX_VALUE) { "Value does not fit in Int: $it" }
+    it.toInt()
+}
+
+/**
+ * Returns a list containing the runs of equal elements and their respective count as Pairs.
+ */
+fun <T> Iterable<T>.runs(): List<Pair<T, Int>> {
+    val iterator = iterator()
+    if (!iterator.hasNext())
+        return emptyList()
+    val result = mutableListOf<Pair<T, Int>>()
+    var current = iterator.next()
+    var count = 1
+    while (iterator.hasNext()) {
+        val next = iterator.next()
+        if (next != current) {
+            result.add(current to count)
+            current = next
+            count = 0
+        }
+        count++
+    }
+    result.add(current to count)
+    return result
+}
+
+fun <T> Iterable<T>.runsOf(e: T): List<Int> {
+    val iterator = iterator()
+    if (!iterator.hasNext())
+        return emptyList()
+    val result = mutableListOf<Int>()
+    var count = 0
+    while (iterator.hasNext()) {
+        val next = iterator.next()
+        if (next == e) {
+            count++
+        } else if (count > 0) {
+            result.add(count)
+            count = 0
+        }
+    }
+    if (count > 0)
+        result.add(count)
+    return result
+}
+
+/**
+ * Returns a sequence containing the runs of equal elements and their respective count as Pairs.
+ */
+fun <T> Sequence<T>.runs(): Sequence<Pair<T, Int>> = sequence {
+    val iterator = iterator()
+    if (iterator.hasNext()) {
+        var current = iterator.next()
+        var count = 1
+        while (iterator.hasNext()) {
+            val next: T = iterator.next()
+            if (next != current) {
+                yield(current to count)
+                current = next
+                count = 0
+            }
+            count++
+        }
+        yield(current to count)
+    }
+}
+
+fun <T> Sequence<T>.runsOf(e: T): Sequence<Int> = runs().filter { it.first == e }.map { it.second }

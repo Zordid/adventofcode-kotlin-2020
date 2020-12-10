@@ -78,8 +78,8 @@ abstract class Day(val day: Int, private val year: Int = 2020, val title: String
 
     fun solve() {
         header
-        runWithTiming(1) { part1 }
-        runWithTiming(2) { part2 }
+        runWithTiming("1") { part1 }
+        runWithTiming("2") { part2 }
     }
 
     fun <T> T.show(prompt: String = "", maxLines: Int = 10): T {
@@ -138,14 +138,15 @@ abstract class Day(val day: Int, private val year: Int = 2020, val title: String
             }
         }
 
-        private inline fun runWithTiming(part: Int, f: () -> Any?) {
-            var result: Any?
-            val millis = measureTimeMillis { result = f() }
-            val duration = if (millis < 1000) "$millis ms" else "${"%.3f".format(millis / 1000.0)} s"
-            println("\nSolution $part: (took $duration)\n$result")
-        }
     }
 
+}
+
+inline fun runWithTiming(part: String, f: () -> Any?) {
+    var result: Any?
+    val millis = measureTimeMillis { result = f() }
+    val duration = if (millis < 1000) "$millis ms" else "${"%.3f".format(millis / 1000.0)} s"
+    println("\nSolution $part: (took $duration)\n$result")
 }
 
 @Suppress("unused")

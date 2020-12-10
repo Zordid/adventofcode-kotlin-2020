@@ -12,5 +12,5 @@ internal class Day04Test {
     fun part2() {
         assertEquals(111, Day04().part2)
     }
-    
+
 }
