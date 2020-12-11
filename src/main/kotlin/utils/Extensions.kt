@@ -48,8 +48,17 @@ fun List<List<*>>.indices(): Sequence<Point> = sequence {
     }
 }
 
-inline fun <T> List<List<T>>.forArea(f: (p: Point, v: T) -> Unit) =
-    indices().forEach { p -> f(p, this[p]!!) }
+inline fun <T> List<List<T>>.forArea(f: (p: Point, v: T) -> Unit) {
+    for (y in this.indices)
+        for (x in this[y].indices)
+            f(x to y, this[y][x])
+}
+
+inline fun <T> List<List<T>>.forArea(f: (p: Point) -> Unit) {
+    for (y in this.indices)
+        for (x in this[y].indices)
+            f(x to y)
+}
 
 operator fun <T> List<List<T>>.get(p: Point): T? =
     if (p.y in indices && p.x in this[p.y].indices) this[p.y][p.x] else null
@@ -57,8 +66,6 @@ operator fun <T> List<List<T>>.get(p: Point): T? =
 operator fun <T> List<MutableList<T>>.set(p: Point, v: T) {
     if (p.y in indices && p.x in this[p.y].indices) this[p.y][p.x] = v
 }
-
-fun <T> List<List<T>>.copyMutable() = List(this.size) { this[it].toMutableList() }
 
 operator fun List<String>.get(p: Point): Char? =
     if (p.y in indices && p.x in this[p.y].indices) this[p.y][p.x] else null

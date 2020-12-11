@@ -1,59 +1,39 @@
 import utils.*
 
-typealias SeatMap = List<List<Char>>
+typealias SeatMap = Grid<Char>
 
 class Day11 : Day(11, title = "Seating System") {
 
     private val seatMap: SeatMap = mappedInput { it.toList() }
-    private val seatPositions = seatMap.matchingIndices { it != NO_SEAT }
 
-    override fun part1(): Int {
-        val generations = generateSequence(seatMap) { prev ->
-            val next = prev.nextGeneration()
-            if (next != prev) next else null
+    override fun part1() = conwaySequence(seatMap, ::rulesPart1).last().sumOf { it.count { it == OCCUPIED } }
+
+    private fun rulesPart1(map: SeatMap, p: Point, here: Char): Char? {
+        if (here == NO_SEAT) return null
+        val occupied = p.surroundingNeighbors().count { n -> map[n] == OCCUPIED }
+        return when {
+            here == EMPTY && occupied == 0 -> OCCUPIED
+            here == OCCUPIED && occupied >= 4 -> EMPTY
+            else -> null
         }
-
-        return generations.last().sumOf { it.count { it == OCCUPIED } }
     }
 
-    private fun SeatMap.nextGeneration(): SeatMap {
-        val result = this.copyMutable()
-        seatPositions.forEach { p ->
-            val occupied = p.surroundingNeighbors().count { n -> this[n] == OCCUPIED }
-            if (this[p] == EMPTY && occupied == 0)
-                result[p] = OCCUPIED
-            else if (this[p] == OCCUPIED && occupied >= 4)
-                result[p] = EMPTY
+    override fun part2() = conwaySequence(seatMap, ::rulesPart2).last().sumOf { it.count { it == OCCUPIED } }
+
+    private fun rulesPart2(map: SeatMap, p: Point, here: Char): Char? {
+        if (here == NO_SEAT) return null
+        val occupied =
+            Direction8.allVectors.count { v ->
+                val lineOfSight = generateSequence(p + v) { it + v }
+                val visibleSeat =
+                    lineOfSight.map { map[it] }.dropWhile { it == NO_SEAT }.firstOrNull()
+                visibleSeat == OCCUPIED
+            }
+        return when {
+            here == EMPTY && occupied == 0 -> OCCUPIED
+            here == OCCUPIED && occupied >= 5 -> EMPTY
+            else -> null
         }
-        return result
-    }
-
-    override fun part2(): Int {
-        val generations = generateSequence(seatMap) { prev ->
-            val next = prev.nextGeneration2()
-            if (next != prev) next else null
-        }
-
-        return generations.last().sumOf { it.count { it == OCCUPIED } }
-    }
-
-    private fun SeatMap.nextGeneration2(): SeatMap {
-        val result = copyMutable()
-        seatPositions.forEach { p ->
-            val occupied =
-                Direction8.allVectors.count { v ->
-                    val lineOfSight = generateSequence(p + v) { it + v }
-                    val visibleSeat =
-                        lineOfSight.map { this[it] }.dropWhile { it == NO_SEAT }.firstOrNull()
-                    visibleSeat == OCCUPIED
-                }
-
-            if (this[p] == EMPTY && occupied == 0)
-                result[p] = OCCUPIED
-            else if (this[p] == OCCUPIED && occupied >= 5)
-                result[p] = EMPTY
-        }
-        return result
     }
 
     companion object {
