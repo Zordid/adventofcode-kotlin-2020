@@ -6,7 +6,7 @@ class Day10 : Day(10, title = "Adapter Array") {
 
     private val adapterRatings = inputAsInts
     private val maxRating = (adapterRatings.maxOrNull()!! + 3).show("Max Jolt")
-    private val allRatings = (adapterRatings + listOf(0, maxRating)).sorted()
+    val allRatings = (adapterRatings + listOf(0, maxRating)).sorted()
     private val joltDifferences = allRatings.windowed(2, 1).map { it[1] - it[0] }
 
     override fun part1() = joltDifferences.count { it == 1 } * joltDifferences.count { it == 3 }
