@@ -4,9 +4,11 @@ typealias SeatMap = Grid<Char>
 
 class Day11 : Day(11, title = "Seating System") {
 
-    private val seatMap: SeatMap = mappedInput { it.toList() }
+    val seatMap: SeatMap = mappedInput { it.toList() }
 
-    override fun part1() = conwaySequence(seatMap, ::rulesPart1).last().sumOf { it.count { it == OCCUPIED } }
+    override fun part1() = sequencePart1().last().sumOf { it.count { it == OCCUPIED } }
+
+    fun sequencePart1() = conwaySequence(seatMap, ::rulesPart1)
 
     private fun rulesPart1(map: SeatMap, p: Point, here: Char): Char? {
         if (here == NO_SEAT) return null
@@ -18,7 +20,9 @@ class Day11 : Day(11, title = "Seating System") {
         }
     }
 
-    override fun part2() = conwaySequence(seatMap, ::rulesPart2).last().sumOf { it.count { it == OCCUPIED } }
+    override fun part2() = sequencePart2().last().sumOf { it.count { it == OCCUPIED } }
+
+    fun sequencePart2() = conwaySequence(seatMap, ::rulesPart2)
 
     private fun rulesPart2(map: SeatMap, p: Point, here: Char): Char? {
         if (here == NO_SEAT) return null
@@ -37,9 +41,9 @@ class Day11 : Day(11, title = "Seating System") {
     }
 
     companion object {
-        private const val EMPTY = 'L'
-        private const val OCCUPIED = '#'
-        private const val NO_SEAT = '.'
+        const val EMPTY = 'L'
+        const val OCCUPIED = '#'
+        const val NO_SEAT = '.'
     }
 }
 
