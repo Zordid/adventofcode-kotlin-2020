@@ -22,6 +22,7 @@ If you are into programming, logic, maybe also a little into competition, this o
 |  8 |Handheld Halting                  |Finally, we got a CPU emulator in 2020. Quite primitive, but still!|
 |  9 |Encoding Error                    |Handling of a bunch of numbers with attributes to check.|
 | 10 |Adapter Array                     |Part 2 turns out to be the hardest puzzle so far! It's not about path finding...|
+| 11 |Seating System                    |A classical Conway game of life with a twist in part 2!| 
 
 ## My logbook of 2020
 
@@ -163,3 +164,10 @@ So the answer to the overall paths possible is the product of all 1-jolt gap run
 of 3-jolt gaps)!
 How many are there: turns out, this is the number of compositions of the length as a sum of the values 1, 2 and 3! In math
 this is called an [A-restricted composition](https://en.wikipedia.org/wiki/Composition_(combinatorics)).
+
+### Day 11: Seating System
+Here we go: Conway is there. Part 1 is extremely classical with a limited set of rules that make the system stable after
+some generations. My starting problems more or less were due to me being unfamiliar (again) with my own helper functions
+for areas, points and such. Bummer!
+Part 2 added a nice twist about calculating the "neighbors" were more than just the classic 8 neighboring fields need
+to be taken into account. Sweet.

@@ -54,6 +54,12 @@ inline fun <T> List<List<T>>.forArea(f: (p: Point, v: T) -> Unit) =
 operator fun <T> List<List<T>>.get(p: Point): T? =
     if (p.y in indices && p.x in this[p.y].indices) this[p.y][p.x] else null
 
+operator fun <T> List<MutableList<T>>.set(p: Point, v: T) {
+    if (p.y in indices && p.x in this[p.y].indices) this[p.y][p.x] = v
+}
+
+fun <T> List<List<T>>.copyMutable() = List(this.size) { this[it].toMutableList() }
+
 operator fun List<String>.get(p: Point): Char? =
     if (p.y in indices && p.x in this[p.y].indices) this[p.y][p.x] else null
 

@@ -30,7 +30,7 @@ class Day10 : Day(10, title = "Adapter Array") {
 }
 
 fun main() {
-    with (Day10()) {
+    with(Day10()) {
         solve()
         runWithTiming("2 - using plain recursive path calculation") { part2BruteForce() }
     }

@@ -27,8 +27,8 @@ fun Point.neighbor(direction: Direction, steps: Int = 1) = this + (direction.vec
 /**
  * calculates the list of the four direct neighbors of the point.
  */
-fun Point.neighbors(): List<Point> = Direction.values().map { neighbor(it) }
-fun Point.surrounding(): List<Point> = toArea().grow().border().toList()
+fun Point.directNeighbors(): List<Point> = Direction4.allVectors.map { this + it }
+fun Point.surroundingNeighbors(): List<Point> = Direction8.allVectors.map { this + it }
 
 val origin = 0 to 0
 
@@ -122,16 +122,24 @@ fun Iterable<Point>.boundingArea(): Area? {
     return (minX.x to minY.y) to (maxX.x to maxY.y)
 }
 
-enum class Direction {
+interface Direction {
+    val name: String
+    val right: Direction
+    val left: Direction
+    val opposite: Direction
+    val vector: Point
+}
+
+enum class Direction4 : Direction {
     UP, RIGHT, DOWN, LEFT;
 
-    val right: Direction
+    override val right: Direction4
         get() = values()[(this.ordinal + 1) % values().size]
-    val left: Direction
+    override val left: Direction4
         get() = values()[(this.ordinal - 1 + values().size) % values().size]
-    val opposite: Direction
+    override val opposite: Direction4
         get() = values()[(this.ordinal + 2) % values().size]
-    val vector: Point
+    override val vector: Point
         get() = when (this) {
             UP -> 0 to -1
             DOWN -> 0 to 1
@@ -140,7 +148,7 @@ enum class Direction {
         }
 
     companion object {
-        fun ofVector(v: Point): Direction? =
+        fun ofVector(v: Point): Direction4? =
             with(v) {
                 when (x.sign to y.sign) {
                     0 to -1 -> UP
@@ -150,5 +158,48 @@ enum class Direction {
                     else -> null
                 }
             }
+
+        val allVectors: List<Point> = values().map { it.vector }
+    }
+}
+
+enum class Direction8 : Direction {
+    NORTH, NORTHEAST, EAST, SOUTHEAST, SOUTH, SOUTHWEST, WEST, NORTHWEST;
+
+    override val right: Direction8
+        get() = values()[(this.ordinal + 1) % values().size]
+    override val left: Direction8
+        get() = values()[(this.ordinal - 1 + values().size) % values().size]
+    override val opposite: Direction8
+        get() = values()[(this.ordinal + 4) % values().size]
+    override val vector: Point
+        get() = when (this) {
+            NORTH -> 0 to -1
+            NORTHEAST -> 1 to -1
+            EAST -> 1 to 0
+            SOUTHEAST -> 1 to 1
+            SOUTH -> 0 to 1
+            SOUTHWEST -> -1 to 1
+            WEST -> -1 to 0
+            NORTHWEST -> -1 to -1
+        }
+
+    companion object {
+        fun ofVector(v: Point): Direction8? =
+            with(v) {
+                when (x.sign to y.sign) {
+                    NORTH.vector -> NORTH
+                    NORTHEAST.vector -> NORTHEAST
+                    EAST.vector -> EAST
+                    SOUTHEAST.vector -> SOUTHEAST
+                    SOUTH.vector -> SOUTH
+                    SOUTHWEST.vector -> SOUTHWEST
+                    WEST.vector -> WEST
+                    NORTHWEST.vector -> NORTHWEST
+                    else -> null
+                }
+            }
+
+        val allVectors: List<Point> = values().map { it.vector }
     }
 }
