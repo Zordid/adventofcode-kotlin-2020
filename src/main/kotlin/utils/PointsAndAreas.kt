@@ -45,6 +45,22 @@ infix operator fun Point.div(factor: Int) = when (factor) {
     else -> x / factor to y / factor
 }
 
+fun Point.rotateLeft90(times: Int = 1): Point = when (times % 4) {
+    0 -> this
+    1 -> y to -x
+    2 -> -x to -y
+    3 -> -y to x
+    else -> error("can't rotate $times timess")
+}
+
+fun Point.rotateRight90(times: Int = 1): Point = when (times % 4) {
+    0 -> this
+    1 -> -y to x
+    2 -> -x to -y
+    3 -> y to -x
+    else -> error("can't rotate $times timess")
+}
+
 operator fun Point.compareTo(other: Point): Int =
     if (y == other.y) x.compareTo(other.x) else y.compareTo(other.y)
 
@@ -130,8 +146,10 @@ interface Direction {
     val vector: Point
 }
 
+operator fun Direction.times(n: Int): Point = vector * n
+
 enum class Direction4 : Direction {
-    UP, RIGHT, DOWN, LEFT;
+    NORTH, EAST, SOUTH, WEST;
 
     override val right: Direction4
         get() = values()[(this.ordinal + 1) % values().size]
@@ -141,20 +159,24 @@ enum class Direction4 : Direction {
         get() = values()[(this.ordinal + 2) % values().size]
     override val vector: Point
         get() = when (this) {
-            UP -> 0 to -1
-            DOWN -> 0 to 1
-            LEFT -> -1 to 0
-            RIGHT -> 1 to 0
+            NORTH -> 0 to -1
+            SOUTH -> 0 to 1
+            WEST -> -1 to 0
+            EAST -> 1 to 0
         }
 
     companion object {
+        val UP = NORTH
+        val RIGHT = EAST
+        val DOWN = SOUTH
+        val LEFT = WEST
         fun ofVector(v: Point): Direction4? =
             with(v) {
                 when (x.sign to y.sign) {
-                    0 to -1 -> UP
-                    1 to 0 -> RIGHT
-                    0 to 1 -> DOWN
-                    -1 to 0 -> LEFT
+                    0 to -1 -> NORTH
+                    1 to 0 -> EAST
+                    0 to 1 -> SOUTH
+                    -1 to 0 -> WEST
                     else -> null
                 }
             }
@@ -185,6 +207,10 @@ enum class Direction8 : Direction {
         }
 
     companion object {
+        val UP = NORTH
+        val RIGHT = EAST
+        val DOWN = SOUTH
+        val LEFT = WEST
         fun ofVector(v: Point): Direction8? =
             with(v) {
                 when (x.sign to y.sign) {

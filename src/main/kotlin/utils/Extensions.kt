@@ -180,3 +180,8 @@ fun <T> Sequence<T>.runs(): Sequence<Pair<T, Int>> = sequence {
 }
 
 fun <T> Sequence<T>.runsOf(e: T): Sequence<Int> = runs().filter { it.first == e }.map { it.second }
+
+fun <T> T.applyTimes(n: Int, f: (T) -> T): T = when (n) {
+    0 -> this
+    else -> f(this).applyTimes(n - 1, f)
+}

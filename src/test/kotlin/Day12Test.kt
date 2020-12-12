@@ -1,16 +1,16 @@
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class Day11Test {
+internal class Day12Test {
 
     @Test
     fun part1() {
-        assertEquals(2093, Day11().part1)
+        assertEquals(962, Day12().part1)
     }
 
     @Test
     fun part2() {
-        assertEquals(1862, Day11().part2)
+        assertEquals(56135, Day12().part2)
     }
 
 }

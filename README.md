@@ -23,6 +23,7 @@ If you are into programming, logic, maybe also a little into competition, this o
 |  9 |Encoding Error                    |Handling of a bunch of numbers with attributes to check.|
 | 10 |Adapter Array                     |Part 2 turns out to be the hardest puzzle so far! It's not about path finding...|
 | 11 |Seating System                    |A classical Conway game of life with a twist in part 2!| 
+| 12 |Rain Risk                         |Follow the instructions style puzzle with questions to the end position.|
 
 ## My logbook of 2020
 
@@ -171,3 +172,8 @@ some generations. My starting problems more or less were due to me being unfamil
 for areas, points and such. Bummer!
 Part 2 added a nice twist about calculating the "neighbors" were more than just the classic 8 neighboring fields need
 to be taken into account. Sweet.
+
+### Day 12: Rain Risk
+Again, a quite easy puzzle that is straight forward. Having a set of directions with ready-made vectors comes handy,
+following the given instructions is a neat little fold operation.
+The only thing to get right is the coordinate system and the corresponding rotate and move operations!
