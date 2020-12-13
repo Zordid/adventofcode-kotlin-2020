@@ -147,6 +147,7 @@ interface Direction {
 }
 
 operator fun Direction.times(n: Int): Point = vector * n
+operator fun Point.plus(direction: Direction): Point = this + direction.vector
 
 enum class Direction4 : Direction {
     NORTH, EAST, SOUTH, WEST;
@@ -170,6 +171,7 @@ enum class Direction4 : Direction {
         val RIGHT = EAST
         val DOWN = SOUTH
         val LEFT = WEST
+
         fun ofVector(v: Point): Direction4? =
             with(v) {
                 when (x.sign to y.sign) {
@@ -180,6 +182,14 @@ enum class Direction4 : Direction {
                     else -> null
                 }
             }
+
+        fun interpret(s: Any): Direction? = when(s.toString().toUpperCase()) {
+            NORTH.name, "N" -> NORTH
+            SOUTH.name, "S" -> SOUTH
+            EAST.name, "E" -> EAST
+            WEST.name, "W" -> WEST
+            else -> null
+        }
 
         val allVectors: List<Point> = values().map { it.vector }
     }
@@ -211,6 +221,7 @@ enum class Direction8 : Direction {
         val RIGHT = EAST
         val DOWN = SOUTH
         val LEFT = WEST
+
         fun ofVector(v: Point): Direction8? =
             with(v) {
                 when (x.sign to y.sign) {
