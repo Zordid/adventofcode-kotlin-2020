@@ -183,7 +183,7 @@ enum class Direction4 : Direction {
                 }
             }
 
-        fun interpret(s: Any): Direction? = when(s.toString().toUpperCase()) {
+        fun interpret(s: Any): Direction? = when (s.toString().toUpperCase()) {
             NORTH.name, "N" -> NORTH
             SOUTH.name, "S" -> SOUTH
             EAST.name, "E" -> EAST
