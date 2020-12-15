@@ -11,7 +11,7 @@ class Day15 : Day(15, title = "Rambunctious Recitation") {
 
         startNumbers.dropLast(1).forEachIndexed { index, i -> stats[i] = index }
 
-        return (startNumbers.size - 1 until n - 1).fold(startNumbers.last()) { lastSpoken, index ->
+        return (startNumbers.lastIndex until n - 1).fold(startNumbers.last()) { lastSpoken, index ->
             val lastSeen = stats[lastSpoken]
             stats[lastSpoken] = index
             lastSeen?.let { index - it } ?: 0
