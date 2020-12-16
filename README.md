@@ -24,6 +24,10 @@ If you are into programming, logic, maybe also a little into competition, this o
 | 10 |Adapter Array                     |Part 2 turns out to be the hardest puzzle so far! It's not about path finding...|
 | 11 |Seating System                    |A classical Conway game of life with a twist in part 2!| 
 | 12 |Rain Risk                         |Follow the instructions style puzzle with questions to the end position.|
+| 13 |Shuttle Search                    ||
+| 14 |Docking Data                      ||
+| 15 |Rambunctious Recitation           ||
+| 16 |Ticket Translation                ||
 
 ## My logbook of 2020
 
