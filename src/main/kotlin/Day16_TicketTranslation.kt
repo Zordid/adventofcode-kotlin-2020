@@ -22,12 +22,12 @@ class Day16 : Day(16, title = "Ticket Translation") {
         }
 
         val fieldFits = myTicket.indices.map { fieldNo ->
-            fields.entries.filter { (_, ranges) ->
+            fieldNo to fields.entries.filter { (_, ranges) ->
                 validTickets.map { it[fieldNo] }.all { it fits ranges }
             }.map { it.key }
         }
 
-        val fieldAssignments = fieldFits.withIndex().sortedBy { it.value.size }
+        val fieldAssignments = fieldFits.sortedBy { it.second.size }
             .fold(emptyMap<String, Int>()) { acc, (fieldNo, possibleFields) ->
                 acc + ((possibleFields - acc.keys).single() to fieldNo)
             }
