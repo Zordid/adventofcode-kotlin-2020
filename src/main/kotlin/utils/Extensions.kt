@@ -12,6 +12,7 @@ fun <T : Comparable<T>> Iterable<T>.minMaxOrNull(): Pair<T, T>? {
     }
     return min to max
 }
+fun <T : Comparable<T>> Sequence<T>.minMaxOrNull(): Pair<T, T>? = asIterable().minMaxOrNull()
 
 inline fun <T, R : Comparable<R>> Iterable<T>.minMaxByOrNull(selector: (T) -> R): Pair<T, T>? {
     val iterator = iterator()
