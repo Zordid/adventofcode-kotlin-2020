@@ -38,7 +38,7 @@ private fun dayNumber(day: Class<out Day>) = day.simpleName.replace("Day", "").t
  */
 var globalTestData: String? = null
     get() = field?.also {
-        println("USING TEST DATA")
+        println("\n!!!! USING TEST DATA !!!!\n")
         field = null
     }
 

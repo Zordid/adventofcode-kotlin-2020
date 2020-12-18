@@ -1,4 +1,3 @@
-
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -11,7 +10,7 @@ internal class Day18Test {
 
     @Test
     fun part2() {
-        assertEquals("85660197232452", Day18().part2.toString())
+        assertEquals(85660197232452L, Day18().part2)
     }
 
 }
