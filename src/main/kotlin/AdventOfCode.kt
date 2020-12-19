@@ -64,8 +64,12 @@ abstract class Day(val day: Int, private val year: Int = 2020, val title: String
     fun <T> mappedInput(lbd: (String) -> T): List<T> =
         rawInput.map(catchingMapper(lbd)).show("Mapped")
 
-    fun <T> parsedInput(columnSeparator: Regex = Regex("\\s+"), lbd: ParserContext.(String) -> T): List<T> =
-        rawInput.map(parsingMapper(columnSeparator, lbd)).show("Parsed")
+    fun <T> parsedInput(
+        columnSeparator: Regex = Regex("\\s+"),
+        predicate: (String) -> Boolean = { true },
+        lbd: ParserContext.(String) -> T
+    ): List<T> =
+        rawInput.filter(predicate).map(parsingMapper(columnSeparator, lbd)).show("Parsed")
 
     fun <T> matchedInput(regex: Regex, lbd: (List<String>) -> T): List<T> =
         rawInput.map(matchingMapper(regex, lbd)).show("Matched")
