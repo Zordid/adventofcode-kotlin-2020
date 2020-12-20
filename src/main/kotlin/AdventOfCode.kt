@@ -59,7 +59,24 @@ abstract class Day(val day: Int, private val year: Int = 2020, val title: String
     val inputAsGrid: List<List<Char>> by lazy { rawInput.map { it.toList() }.show("Grid") }
     val inputAsInts: List<Int> by lazy { rawInput.map { it.extractInt() }.show("Int") }
     val inputAsLongs: List<Long> by lazy { rawInput.map { it.extractLong() }.show("Long") }
-    val inputAsString: String by lazy { rawInput.joinToString("").also { listOf(it).show("One string") } }
+    val inputAsString: String by lazy { rawInput.joinToString("\n").also { listOf(it).show("One string") } }
+
+    fun chunkedInput(delimiter: (String) -> Boolean = String::isEmpty): List<List<String>> {
+        val result = mutableListOf<List<String>>()
+        var currentSubList: MutableList<String>? = null
+        for (line in rawInput) {
+            if (delimiter(line)) {
+                currentSubList = null
+            } else {
+                if (currentSubList == null) {
+                    currentSubList = mutableListOf(line)
+                    result += currentSubList
+                } else
+                    currentSubList.add(line)
+            }
+        }
+        return result.show("Chunked into ${result.size} chunks")
+    }
 
     fun <T> mappedInput(lbd: (String) -> T): List<T> =
         rawInput.map(catchingMapper(lbd)).show("Mapped")
