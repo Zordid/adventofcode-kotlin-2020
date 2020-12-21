@@ -92,7 +92,7 @@ class Day20 : Day(20, title = "Jurassic Jigsaw") {
 //        return 0
 
         val result = solution.first
-        result.printIds()
+//        result.printIds()
         val area = result.keys.boundingArea()!!
         return area.corners().map { result[it]!! }.productAsLong()
     }
@@ -109,7 +109,7 @@ class Day20 : Day(20, title = "Jurassic Jigsaw") {
                 .map { y -> row.map { it[y] }.reduce { acc, list -> acc + list } }
         }.flatMap { it }.toList()
 
-        image.print()
+//        image.print()
 
         val monsters = operations.map { (rotations, flip) ->
             image.modify(rotations, flip).detectImage(monsterPoints).count()

@@ -5,27 +5,19 @@ class Day13 : Day(13, title = "Shuttle Search") {
     private val earliest = input[0].toInt().show("Earliest timestamp")
     private val busses = input[1].split(",").map { it.toIntOrNull() }
 
-    override fun part1(): Any? {
-        return busses.filterNotNull().map { it to if (earliest % it == 0) 0 else (earliest / it + 1) * it - earliest }
-            .minByOrNull { it.second }?.let {
-                println(it)
-                it.first * it.second
-            }
-    }
+    override fun part1() =
+        busses.filterNotNull().map { it to if (earliest % it == 0) 0 else (earliest / it + 1) * it - earliest }
+            .minByOrNull { it.second }?.let { it.first * it.second }
 
-    override fun part2(): Any? {
+    override fun part2(): BigInteger {
         val x =
             busses.withIndex().filter { it.value != null }.map { it.value!!.toBigInteger() to it.index.toBigInteger() }
                 .sortedByDescending { it.first }
 
-        println(x)
         val r = x.reduce { (aPeriod, aPhase), (period, phase) ->
-            val x = combinedPhasedRotations(aPeriod, aPhase, period, phase)
-            println(x)
-            x
+            combinedPhasedRotations(aPeriod, aPhase, period, phase)
         }
 
-        println(r)
         return r.first - r.second
     }
 }
