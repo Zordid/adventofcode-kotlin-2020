@@ -22,7 +22,7 @@ class Day18 : Day(18, title = "Operation Order") {
     private fun String.evaluatePart2(): Long {
         trim().toLongOrNull()?.let { return it }
 
-        val tokens = tokenize()
+        val tokens = tokenize().toMutableList()
         val operationsInOrder = listOf<Pair<String, Long.(Long) -> Long>>("+" to Long::plus, "*" to Long::times)
         operationsInOrder.forEach { (operator, operation) ->
             while (tokens.contains(operator)) {
@@ -37,7 +37,7 @@ class Day18 : Day(18, title = "Operation Order") {
         return tokens.single().toLong()
     }
 
-    private fun String.tokenize(): MutableList<String> {
+    private fun String.tokenize(): List<String> {
         var s = this.trim()
         val tokens = mutableListOf<String>()
         do {
