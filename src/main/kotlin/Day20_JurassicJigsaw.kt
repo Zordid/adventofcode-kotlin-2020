@@ -9,7 +9,7 @@ class Day20 : Day(20, title = "Jurassic Jigsaw") {
     val operations = (0..3).flatMap { rotation -> listOf(false, true).map { flip -> rotation to flip } }
 
     val piecesWithAllOrientations = pieces.mapValues { (_, piece) ->
-        operations.map { (r, f) -> piece.modify(r, f) }
+        operations.asSequence().map { (r, f) -> piece.modify(r, f) }
     }
 
     private fun puzzle(
