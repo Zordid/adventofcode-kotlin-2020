@@ -1,8 +1,12 @@
+typealias Ingredient = String
+typealias Allergen = String
+
 class Day21 : Day(21, title = "Allergen Assessment") {
 
-    private val foods = matchedInput(Regex("(.*) \\(contains (.*)\\)")) {
-        it[1].split(" ") to it[2].split(", ")
-    }
+    private val foods: List<Pair<List<Ingredient>, List<Allergen>>> =
+        matchedInput(Regex("(.*) \\(contains (.*)\\)")) {
+            it[1].split(" ") to it[2].split(", ")
+        }
 
     private val ingredients = foods.flatMap { it.first }.toSet()
     private val allergens = foods.flatMap { it.second }.toSet()
@@ -17,14 +21,22 @@ class Day21 : Day(21, title = "Allergen Assessment") {
         a to ingredientsContainingA
     }.toMap()
 
-    private val associations: Map<String, String?> by lazy { findAssociations()!! }
-
-    override fun part1() =
-        associations.filter { it.value == null }.map { it.key }
+    override fun part1(): Int {
+        return cantContainAnything()
             .sumBy { i -> foods.count { i in it.first } }
+    }
 
-    override fun part2() =
-        associations.entries.filter { it.value != null }.sortedBy { it.value }.joinToString(",") { it.key }
+    override fun part2(): String {
+        val startSetup: Map<Ingredient, Allergen?> = cantContainAnything().map { it to null }.toMap()
+        return findAssociations(startSetup)!!.entries.filter { it.value != null }.sortedBy { it.value }.joinToString(",") { it.key }
+    }
+
+    private fun cantContainAnything() = ingredients.filter {
+        allergens.none { allergen -> it canContain allergen }
+    }
+
+    private infix fun Ingredient.canContain(allergen: Allergen): Boolean =
+        foods.filter { this !in it.first }.none { allergen in it.second }
 
     private fun findAssociations(associations: Map<String, String?> = emptyMap()): Map<String, String?>? {
         //println("Done with ${associations.size} associations!")
