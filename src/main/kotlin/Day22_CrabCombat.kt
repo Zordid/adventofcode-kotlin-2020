@@ -32,13 +32,11 @@ class Day22 : Day(22, title = "Crab Combat") {
                 println("Player 2's deck: ${decks[1]}")
             }
             // safety first!
-            if (decks[0] in mem[0] || decks[1] in mem[1]) {
+            if (!(mem[0].add(decks[0].toList()) && mem[1].add(decks[1].toList()))) {
                 if (verbose)
                     println("We have seen this constellation before! => Player 1 wins game $game!")
                 return 0
             }
-            mem[0].add(decks[0].toList())
-            mem[1].add(decks[1].toList())
 
             val card0 = decks[0].removeFirst()
             val card1 = decks[1].removeFirst()
