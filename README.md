@@ -29,7 +29,11 @@ If you are into programming, logic, maybe also a little into competition, this o
 | 15 |Rambunctious Recitation           ||
 | 16 |Ticket Translation                ||
 | 17 |Conway Cubes                      |A simple 3D and 4D conway Game of Life - no surprises at all.|
-| 18 |Operation Order                   |Seamingly simple, but horribly bad parsing of strange math terms.|
+| 18 |Operation Order                   |Seemingly simple, but horribly bad parsing of strange math terms.|
+| 19 |Monster Messages                  ||
+| 20 |Jurassic Jigsaw                   |My favorite puzzle so far. It's a real puzzle to code!|
+| 21 |Allergen Assessment               |Combinations, combinations. If you don't solve part 1 efficiently, it's gonna take some time to solve part 2.|
+| 22 |Crab Combat                       |Easy again! Just code the game. No real harm done.|
 
 ## My logbook of 2020
 
