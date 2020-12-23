@@ -7,7 +7,7 @@ class Day23 : Day(23, title = "Crab Cups") {
     private val cupValueRange = cups.rangeOrNull()!!
 
     override fun part1(): String {
-        val circle = Element.createFrom(cups)
+        val circle = CircularList.createFrom(cups)
         shuffleTheCups(100, circle, cupValueRange) { current, value ->
             current.firstOrNull(value)!!
         }
@@ -15,27 +15,28 @@ class Day23 : Day(23, title = "Crab Cups") {
     }
 
     override fun part2(): Long {
-        val circle = Element.createFrom(cups)
+        val circle = CircularList.createFrom(cups)
 
-        val quickAccess = Array<Element?>(1_000_001) { null }
+        val quickAccess = Array(1_000_001) { circle }
         circle.forEach { quickAccess[it.value] = it }
 
         val highest = cupValueRange.last
-        var last = circle.prev
         (highest + 1..1_000_000).forEach { n ->
-            Element(n).also {
-                last.insertAfter(it)
-                quickAccess[n] = it
-                last = it
-            }
+            circle.prev.insertAfter(CircularList(n))
+            quickAccess[n] = circle.prev
         }
 
         val valueRange = cupValueRange.first..1_000_000
-        shuffleTheCups(10_000_000, circle, valueRange) { _, v -> quickAccess[v]!! }
-        return quickAccess[1]!!.next.toList(2).productAsLong()
+        shuffleTheCups(10_000_000, circle, valueRange) { _, v -> quickAccess[v] }
+        return quickAccess[1].next.toList(2).productAsLong()
     }
 
-    private inline fun shuffleTheCups(times: Int, cups: Element, range: IntRange, search: (Element, Int) -> Element) {
+    private inline fun shuffleTheCups(
+        times: Int,
+        cups: CircularList,
+        range: IntRange,
+        search: (CircularList, Int) -> CircularList
+    ) {
         var current = cups
         repeat(times) {
 //            println("\n-- move ${it + 1} --")
@@ -62,19 +63,19 @@ class Day23 : Day(23, title = "Crab Cups") {
 
 }
 
-class Element(val value: Int) {
-    val next: Element get() = _next
-    val prev: Element get() = _prev
+class CircularList(val value: Int) {
+    val next: CircularList get() = _next
+    val prev: CircularList get() = _prev
 
-    private var _next: Element = this
-    private var _prev: Element = this
+    private var _next: CircularList = this
+    private var _prev: CircularList = this
 
-    fun insertAfter(e: Element) {
+    fun insertAfter(e: CircularList) {
         this._next = e.also { e.prev._next = next }
         e.next._prev = e.prev.also { e._prev = this }
     }
 
-    fun removeAfter(count: Int = 1): Element {
+    fun removeAfter(count: Int = 1): CircularList {
         val cutFrom = next
         var cutTo = this
         repeat(count) { cutTo = cutTo.next }
@@ -85,7 +86,7 @@ class Element(val value: Int) {
         return cutFrom
     }
 
-    fun firstOrNull(target: Int): Element? {
+    fun firstOrNull(target: Int): CircularList? {
         var current = this
         do {
             if (current.value == target) return current
@@ -103,7 +104,7 @@ class Element(val value: Int) {
         return false
     }
 
-    inline fun forEach(lbd: (Element) -> Unit) {
+    inline fun forEach(lbd: (CircularList) -> Unit) {
         var current = this
         do {
             lbd(current)
@@ -112,7 +113,7 @@ class Element(val value: Int) {
     }
 
     fun asSequence(): Sequence<Int> = sequence {
-        var current = this@Element
+        var current = this@CircularList
         while (true) {
             yield(current.value)
             current = current.next
@@ -130,11 +131,11 @@ class Element(val value: Int) {
     }
 
     companion object {
-        fun createFrom(values: Collection<Int>): Element {
-            val first = Element(values.first())
+        fun createFrom(values: Collection<Int>): CircularList {
+            val first = CircularList(values.first())
             var current = first
             values.drop(1).forEach { v ->
-                Element(v).also {
+                CircularList(v).also {
                     current.insertAfter(it)
                     current = it
                 }
