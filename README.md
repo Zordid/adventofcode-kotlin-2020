@@ -34,6 +34,7 @@ If you are into programming, logic, maybe also a little into competition, this o
 | 20 |Jurassic Jigsaw                   |My favorite puzzle so far. It's a real puzzle to code!|
 | 21 |Allergen Assessment               |Combinations, combinations. If you don't solve part 1 efficiently, it's gonna take some time to solve part 2.|
 | 22 |Crab Combat                       |Easy again! Just code the game. No real harm done.|
+| 23 |Crab Cups                         |Going in a circle with lots of repetitions!|
 
 ## My logbook of 2020
 
