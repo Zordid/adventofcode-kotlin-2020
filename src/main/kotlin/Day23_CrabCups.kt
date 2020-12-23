@@ -6,20 +6,19 @@ class Day23 : Day(23, title = "Crab Cups") {
     private val cups = inputAsString.toList().map { it.toString().toInt() }.show("Cups")
     private val cupValueRange = cups.rangeOrNull()!!
 
-
     override fun part1(): String {
         val circle = Element.createFrom(cups)
         shuffleTheCups(100, circle, cupValueRange) { current, value ->
             current.firstOrNull(value)!!
         }
-        return circle.firstOrNull(1)!!.toList().drop(1).joinToString("")
+        return circle.firstOrNull(1)!!.next.toList().joinToString("")
     }
 
     override fun part2(): Long {
         val circle = Element.createFrom(cups)
 
         val quickAccess = Array<Element?>(1_000_001) { null }
-        circle.forEach { quickAccess[it.v] = it }
+        circle.forEach { quickAccess[it.value] = it }
 
         val highest = cupValueRange.last
         var last = circle.prev
@@ -38,18 +37,17 @@ class Day23 : Day(23, title = "Crab Cups") {
 
     private inline fun shuffleTheCups(times: Int, cups: Element, range: IntRange, search: (Element, Int) -> Element) {
         var current = cups
-        repeat(times) { move ->
-//            println("\n-- move ${move + 1} --")
+        repeat(times) {
+//            println("\n-- move ${it + 1} --")
 //            println("cups: (${current.v}) ${current.toList().drop(1).joinToString(" ")}")
-            val label: Int = current.v
+            val label: Int = current.value
 
             val picked = current.removeAfter(3)
-            val pickedValues = picked.toList()
-//            println("pick up: ${pickedValues.joinToString(" ")}")
+//            println("pick up: ${picked.toList().joinToString(" ")}")
 
             var destinationValue = label - 1
             if (destinationValue < range.first) destinationValue = range.last
-            while (destinationValue in pickedValues) {
+            while (destinationValue in picked) {
                 destinationValue--
                 if (destinationValue < range.first) destinationValue = range.last
             }
@@ -64,19 +62,19 @@ class Day23 : Day(23, title = "Crab Cups") {
 
 }
 
-class Element(val v: Int) {
-    val next: Element get() = _next ?: this
-    val prev: Element get() = _prev ?: this
+class Element(val value: Int) {
+    val next: Element get() = _next
+    val prev: Element get() = _prev
 
-    private var _next: Element? = null
-    private var _prev: Element? = null
+    private var _next: Element = this
+    private var _prev: Element = this
 
     fun insertAfter(e: Element) {
         this._next = e.also { e.prev._next = next }
         e.next._prev = e.prev.also { e._prev = this }
     }
 
-    fun removeAfter(count: Int): Element {
+    fun removeAfter(count: Int = 1): Element {
         val cutFrom = next
         var cutTo = this
         repeat(count) { cutTo = cutTo.next }
@@ -88,11 +86,21 @@ class Element(val v: Int) {
     }
 
     fun firstOrNull(target: Int): Element? {
-        var result = this
-        while (result.v != target && result.next != this) {
-            result = result.next
-        }
-        return if (result.v == target) result else null
+        var current = this
+        do {
+            if (current.value == target) return current
+            current = current.next
+        } while (current != this)
+        return null
+    }
+
+    operator fun contains(target: Int): Boolean {
+        var current = this
+        do {
+            if (current.value == target) return true
+            current = current.next
+        } while (current != this)
+        return false
     }
 
     inline fun forEach(lbd: (Element) -> Unit) {
@@ -103,11 +111,19 @@ class Element(val v: Int) {
         } while (current != this)
     }
 
-    fun toList(limit: Int? = null): List<Int> {
-        val result = mutableListOf<Int>()
+    fun asSequence(): Sequence<Int> = sequence {
+        var current = this@Element
+        while (true) {
+            yield(current.value)
+            current = current.next
+        }
+    }
+
+    fun toList(limit: Int = -1): List<Int> {
+        val result = if (limit != -1) ArrayList(limit) else mutableListOf<Int>()
         var current = this
         do {
-            result += current.v
+            result += current.value
             current = current.next
         } while (current != this && result.size != limit)
         return result
