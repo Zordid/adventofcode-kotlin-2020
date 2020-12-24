@@ -35,6 +35,7 @@ If you are into programming, logic, maybe also a little into competition, this o
 | 21 |Allergen Assessment               |Combinations, combinations. If you don't solve part 1 efficiently, it's gonna take some time to solve part 2.|
 | 22 |Crab Combat                       |Easy again! Just code the game. No real harm done.|
 | 23 |Crab Cups                         |Going in a circle with lots of repetitions!|
+| 24 |Lobby Layout                      |Is Eric sponsored by Conway? :-) Nice hexagonal coordinate puzzle with another Conway|
 
 ## My logbook of 2020
 
