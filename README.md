@@ -36,6 +36,7 @@ If you are into programming, logic, maybe also a little into competition, this o
 | 22 |Crab Combat                       |Easy again! Just code the game. No real harm done.|
 | 23 |Crab Cups                         |Going in a circle with lots of repetitions!|
 | 24 |Lobby Layout                      |Is Eric sponsored by Conway? :-) Nice hexagonal coordinate puzzle with another Conway|
+| 25 |Combo Breaker                     |Analyze a handshake mechanism between a door and a key card.|
 
 ## My logbook of 2020
 
