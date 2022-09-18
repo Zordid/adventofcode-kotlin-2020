@@ -2,16 +2,15 @@ import utils.productAsLong
 
 class Day16 : Day(16, title = "Ticket Translation") {
 
-    private val fields: Map<String, List<IntRange>> = input.filter { ':' in it.dropLast(1) }
-        .map {
-            val n = it.extractAllIntegers()
-            it.split(":")[0] to listOf(n[0]..-n[1], n[2]..-n[3])
-        }.toMap().show("Fields")
+    private val fields: Map<String, List<IntRange>> = input.filter { ':' in it.dropLast(1) }.associate {
+        val n = it.extractAllIntegers()
+        it.split(":")[0] to listOf(n[0]..-n[1], n[2]..-n[3])
+    }.show("Fields")
 
     private val tickets: List<List<Int>> = input.filter { it.isNotEmpty() && ':' !in it }
         .map { it.extractAllIntegers() }.show("Tickets")
 
-    override fun part1() = tickets.drop(1).sumBy { ticketValues ->
+    override fun part1() = tickets.drop(1).sumOf { ticketValues ->
         ticketValues.filter { value -> fields.values.none { value fits it } }.sum()
     }
 

@@ -5,9 +5,9 @@ class Day06 : Day(6, title = "Custom Customs") {
         .map { it.split(" ").map(String::toSet) }
         .show("Customs answers groups")
 
-    override fun part1() = customsAnswers.map { it.reduce(Set<Char>::union) }.sumBy { it.size }
+    override fun part1() = customsAnswers.map { it.reduce(Set<Char>::union) }.sumOf { it.size }
 
-    override fun part2() = customsAnswers.map { it.reduce(Set<Char>::intersect) }.sumBy { it.size }
+    override fun part2() = customsAnswers.map { it.reduce(Set<Char>::intersect) }.sumOf { it.size }
 
 }
 

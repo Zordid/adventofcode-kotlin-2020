@@ -23,7 +23,7 @@ class Day04 : Day(4, title = "Password Processing") {
     }
 
     private fun String.toMap(kvpDelimiter: String, kvDelimiter: String) =
-        split(kvpDelimiter).map { it.split(kvDelimiter, limit = 2).let { (k, v) -> k to v } }.toMap()
+        split(kvpDelimiter).associate { it.split(kvDelimiter, limit = 2).let { (k, v) -> k to v } }
 
 }
 

@@ -1,5 +1,3 @@
-import utils.minMaxByOrNull
-
 class Day19 : Day(19, title = "Monster Messages") {
 
     sealed class Rule {
@@ -17,11 +15,13 @@ class Day19 : Day(19, title = "Monster Messages") {
                     2 -> r.expand(a[0]).flatMap { p ->
                         r.expand(a[1]).map { "$p$it" }
                     }
+
                     3 -> r.expand(a[0]).flatMap { p ->
                         r.expand(a[1]).flatMap { p2 ->
                             r.expand(a[2]).map { "$p$p2$it" }
                         }
                     }
+
                     else -> error(a)
                 }
         }
@@ -34,6 +34,7 @@ class Day19 : Day(19, title = "Monster Messages") {
                     2 -> r.expand(a[0]).flatMap { p ->
                         r.expand(a[1]).map { "$p$it" }
                     }
+
                     else -> error(a)
                 }
 
@@ -63,7 +64,7 @@ class Day19 : Day(19, title = "Monster Messages") {
 
     val rulesSet = RuleSet(rules)
 
-    override fun part1(): Any? {
+    override fun part1(): Any {
         val r31 = rulesSet.expand(31)
         val r42 = rulesSet.expand(42)
         val c = data.map {
@@ -78,7 +79,7 @@ class Day19 : Day(19, title = "Monster Messages") {
         return c // data.filter { it in rulesSet.expand(0) }.size
     }
 
-    override fun part2(): Any? {
+    override fun part2(): Any {
         val r31 = rulesSet.expand(31)
         val r42 = rulesSet.expand(42)
 
@@ -90,15 +91,11 @@ class Day19 : Day(19, title = "Monster Messages") {
                     else -> 0
                 }
             }
+        }.count {
+            val c42 = it.takeWhile { it == 42 }.count()
+            val c31 = it.reversed().takeWhile { it == 31 }.count()
+            c42 + c31 == it.size && c31 > 0 && c42 > c31
         }
-            //.onEach { println(it) }
-            .filter {
-                val c42 = it.takeWhile { it == 42 }.count()
-                val c31 = it.reversed().takeWhile { it == 31 }.count()
-                c42 + c31 == it.size && c31 > 0 && c42 > c31
-            }
-           // .onEach { println(it) }
-            .count()
 
         return c
     }

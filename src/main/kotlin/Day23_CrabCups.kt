@@ -11,7 +11,7 @@ class Day23 : Day(23, title = "Crab Cups") {
         shuffleTheCups(100, circle, cupValueRange) { current, value ->
             current.firstOrNull(value)!!
         }
-        return circle.firstOrNull(1)!!.next.toList().joinToString("")
+        return circle.firstOrNull(1)!!.next.toList(8).joinToString("")
     }
 
     override fun part2(): Long {

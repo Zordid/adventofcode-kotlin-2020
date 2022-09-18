@@ -2,14 +2,69 @@ import utils.*
 
 class Day20 : Day(20, title = "Jurassic Jigsaw") {
 
-    private val pieces = chunkedInput().map {
+    private val pieces = chunkedInput().associate {
         it.first().sequenceContainedIntegers().first() to it.drop(1).takeWhile { it.isNotEmpty() }.map { it.toList() }
-    }.toMap().show("Tiles")
+    }.show("Tiles")
 
     val operations = (0..3).flatMap { rotation -> listOf(false, true).map { flip -> rotation to flip } }
 
+    fun PuzzlePiece.edgeCodes() = operations.map { (rotations, flip) ->
+        when (rotations) {
+            0 -> this.first()
+            1 -> map { it.last() }
+            2 -> this.last().asReversed()
+            else -> asReversed().map { it.first() }
+        }.let { if (flip) it.asReversed().code() else it.code() }
+    }.distinct()
+
+    fun List<Char>.code() = joinToString("").replace('#', '1').replace('.', '0').toInt(2)
+
     val piecesWithAllOrientations = pieces.mapValues { (_, piece) ->
         operations.asSequence().map { (r, f) -> piece.modify(r, f) }
+    }
+
+    override fun part1(): Long {
+
+        val edges = pieces.mapValues { (_, v) -> v.edgeCodes() }
+        val doubles = edges.values.flatten().groupingBy { it }.eachCount().filterValues { v -> v == 2 }.keys
+//        println(doubles)
+
+        val corners = edges.filterValues { c -> c.count { it in doubles } < 6 }.keys
+//        println(corners)
+        return corners.productAsLong()
+//        var p = pieces[3779]!!
+//        p = listOf("123".toList(), "456".toList(), "789".toList())
+//        repeat(4) {
+//            println("\n$it rotations:")
+//            p.print()
+//            p = p.rotate()
+//        }
+//        return 0L
+
+//        val edges = piecesWithAllOrientations.values.flatMap { it.map { it.first().joinToString("")}}
+//        edges.forEach { println(it) }
+//        println(pieces.size)
+//        println(edges.size)
+//        println(edges.distinct().size)
+//        return 0
+
+//        pieces.forEach { (id, piece) ->
+//            println("-".repeat(100))
+//            println(id)
+//            println()
+//
+//            val flipped = piece.flipHorizontal().rotate().rotate()
+//            piece.zip(flipped).forEach { (p, f) ->
+//                println(p.joinToString("\t") + "\t\t" + f.joinToString("\t"))
+//            }
+//            println("-".repeat(100))
+//        }
+//        return 0
+
+        val result = solution.first
+//        result.printIds()
+        val area = result.keys.boundingArea()!!
+        return area.corners().map { result[it]!! }.productAsLong()
     }
 
     private fun puzzle(
@@ -60,43 +115,6 @@ class Day20 : Day(20, title = "Jurassic Jigsaw") {
 
     private val solution: Pair<Map<Point, Int>, Map<Point, PuzzlePiece>> by lazy { puzzle()!! }
 
-    override fun part1(): Long {
-
-//        var p = pieces[3779]!!
-//        p = listOf("123".toList(), "456".toList(), "789".toList())
-//        repeat(4) {
-//            println("\n$it rotations:")
-//            p.print()
-//            p = p.rotate()
-//        }
-//        return 0L
-
-//        val edges = piecesWithAllOrientations.values.flatMap { it.map { it.first().joinToString("")}}
-//        edges.forEach { println(it) }
-//        println(pieces.size)
-//        println(edges.size)
-//        println(edges.distinct().size)
-//        return 0
-
-//        pieces.forEach { (id, piece) ->
-//            println("-".repeat(100))
-//            println(id)
-//            println()
-//
-//            val flipped = piece.flipHorizontal().rotate().rotate()
-//            piece.zip(flipped).forEach { (p, f) ->
-//                println(p.joinToString("\t") + "\t\t" + f.joinToString("\t"))
-//            }
-//            println("-".repeat(100))
-//        }
-//        return 0
-
-        val result = solution.first
-//        result.printIds()
-        val area = result.keys.boundingArea()!!
-        return area.corners().map { result[it]!! }.productAsLong()
-    }
-
     override fun part2(): Int {
         val result = solution.second
 
@@ -115,7 +133,7 @@ class Day20 : Day(20, title = "Jurassic Jigsaw") {
             image.modify(rotations, flip).detectImage(monsterPoints).count()
         }.single { it > 0 }
 
-        return image.sumBy { it.count { it == '#' } } - monsters * monsterPoints.size
+        return image.sumOf { it.count { it == '#' } } - monsters * monsterPoints.size
 
     }
 

@@ -7,72 +7,77 @@ class Day22 : Day(22, title = "Crab Combat") {
         val decks = startDecks.map { it.toMutableList() }
         while (decks.all { it.isNotEmpty() }) {
             val cards = decks.map { it.removeFirst() }
-            val winner = if (cards[0] > cards[1]) 0 else 1
+            val winner = cards.indexOf(cards.maxOrNull()!!)
             decks[winner].addAll(cards.sortedDescending())
         }
         return decks.flatten().asReversed().mapIndexed { idx, value -> (idx + 1) * value }.sum()
     }
 
-    override fun part2(): Int = playRecursiveCombat(startDecks).let { winnerScore }
+    override fun part2(): Int = playRecursiveCombat(startDecks[0], startDecks[1]).let { winnerScore }
 
     private var winnerScore = 0
     private val verbose = false
 
-    private fun playRecursiveCombat(pStart: List<List<Int>>, game: Int = 1): Int {
+    private fun playRecursiveCombat(startDeck0: List<Int>, startDeck1: List<Int>, game: Int = 1): Int {
         if (verbose)
             println("\n=== Game $game ===")
-        val decks = pStart.map { it.toMutableList() }
+        val deck0 = startDeck0.toMutableList()
+        val deck1 = startDeck1.toMutableList()
         val mem: List<MutableSet<List<Int>>> = listOf(mutableSetOf(), mutableSetOf())
         var round = 0
-        while (decks.all { it.isNotEmpty() }) {
+        var winner = -1
+        while (winner < 0) {
             round++
             if (verbose) {
                 println("\n-- Round $round (Game $game) --")
-                println("Player 1's deck: ${decks[0]}")
-                println("Player 2's deck: ${decks[1]}")
+                println("Player 1's deck: $deck0")
+                println("Player 2's deck: $deck1")
             }
             // safety first!
-            if (!(mem[0].add(decks[0].toList()) && mem[1].add(decks[1].toList()))) {
+            if (!(mem[0].add(deck0.toList()) && mem[1].add(deck1.toList()))) {
                 if (verbose)
                     println("We have seen this constellation before! => Player 1 wins game $game!")
                 return 0
             }
 
-            val card0 = decks[0].removeFirst()
-            val card1 = decks[1].removeFirst()
+            val card0 = deck0.removeFirst()
+            val card1 = deck1.removeFirst()
             if (verbose) {
                 println("Play 1 plays: $card0")
                 println("Play 2 plays: $card1")
             }
-            val roundWinner = if (decks[0].size >= card0 && decks[1].size >= card1) {
+            val roundWinner = if (deck0.size >= card0 && deck1.size >= card1) {
                 if (verbose)
                     println("Playing a sub-game to determine the winner...")
-                val w = playRecursiveCombat(listOf(decks[0].subList(0, card0), decks[1].subList(0, card1)), game + 1)
+                val rW = playRecursiveCombat(deck0.subList(0, card0), deck1.subList(0, card1), game + 1)
                 if (verbose)
                     println("\n...anyway, back to game $game.")
-                w
+                rW
             } else {
                 if (card0 > card1) 0 else 1
             }
             if (verbose)
                 println("Player ${roundWinner + 1} wins round $round of game $game!")
             if (roundWinner == 0) {
-                decks[0].add(card0)
-                decks[0].add(card1)
+                deck0.add(card0)
+                deck0.add(card1)
             } else {
-                decks[1].add(card1)
-                decks[1].add(card0)
+                deck1.add(card1)
+                deck1.add(card0)
+            }
+            when {
+                deck0.isEmpty() -> winner = 1
+                deck1.isEmpty() -> winner = 0
             }
         }
-        val winner = decks.indexOfFirst { it.isNotEmpty() }
         if (verbose)
             println("The winner of game $game is player ${winner + 1}!")
         if (game == 1) {
-            winnerScore = decks.flatten().asReversed().mapIndexed { idx, value -> (idx + 1) * value }.sum()
+            winnerScore = (deck0 + deck1).asReversed().mapIndexed { idx, value -> (idx + 1) * value }.sum()
             if (verbose) {
                 println("\n\n== Post-game results ==")
-                println("Player 1's deck: ${decks[0]}")
-                println("Player 2's deck: ${decks[1]}")
+                println("Player 1's deck: $deck0")
+                println("Player 2's deck: $deck1")
             }
         }
         return winner

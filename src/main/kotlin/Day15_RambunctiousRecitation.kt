@@ -27,7 +27,7 @@ class Day15 : Day(15, title = "Rambunctious Recitation") {
         val firstSpoken = startNumbers[0]
         var lastSpoken = startNumbers[lastIndex]
         for (index in lastIndex until n - 1) {
-            val lastSeen = stats[lastSpoken].also { stats[lastSpoken] = index}
+            val lastSeen = stats[lastSpoken].also { stats[lastSpoken] = index }
             lastSpoken = if (lastSeen > 0 || lastSpoken == firstSpoken) {
                 index - lastSeen
             } else {

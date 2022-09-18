@@ -2,9 +2,9 @@ class Day18 : Day(18, title = "Operation Order") {
 
     private val homework = input
 
-    override fun part1() = homework.map { it.evaluatePart1() }.sum()
+    override fun part1() = homework.sumOf { it.evaluatePart1() }
 
-    override fun part2() = homework.map { it.evaluatePart2() }.sum()
+    override fun part2() = homework.sumOf { it.evaluatePart2() }
 
     private fun String.evaluatePart1(): Long {
         trim().toLongOrNull()?.let { return it }
@@ -55,6 +55,7 @@ class Day18 : Day(18, title = "Operation Order") {
             '(' -> matchingClosingParenthesisAt().let {
                 substring(1, it) to drop(it + 1)
             }
+
             else -> c.toString() to drop(1)
         }
     }

@@ -11,24 +11,25 @@ class Day21 : Day(21, title = "Allergen Assessment") {
     private val ingredients = foods.flatMap { it.first }.toSet()
     private val allergens = foods.flatMap { it.second }.toSet()
 
-    private val ingredientMightContain = ingredients.map { i ->
+    private val ingredientMightContain = ingredients.associateWith { i ->
         val foodsWithI = foods.filter { i in it.first }.flatMap { it.second }.toSet()
-        i to foodsWithI
-    }.toMap()
+        foodsWithI
+    }
 
-    private val allergenCouldBeIn = allergens.map { a ->
+    private val allergenCouldBeIn = allergens.associateWith { a ->
         val ingredientsContainingA = foods.filter { a in it.second }.map { it.first.toSet() }
-        a to ingredientsContainingA
-    }.toMap()
+        ingredientsContainingA
+    }
 
     override fun part1(): Int {
         return cantContainAnything()
-            .sumBy { i -> foods.count { i in it.first } }
+            .sumOf { i -> foods.count { i in it.first } }
     }
 
     override fun part2(): String {
-        val startSetup: Map<Ingredient, Allergen?> = cantContainAnything().map { it to null }.toMap()
-        return findAssociations(startSetup)!!.entries.filter { it.value != null }.sortedBy { it.value }.joinToString(",") { it.key }
+        val startSetup: Map<Ingredient, Allergen?> = cantContainAnything().associateWith { null }
+        return findAssociations(startSetup)!!.entries.filter { it.value != null }.sortedBy { it.value }
+            .joinToString(",") { it.key }
     }
 
     private fun cantContainAnything() = ingredients.filter {
@@ -50,8 +51,9 @@ class Day21 : Day(21, title = "Allergen Assessment") {
 
         val notAssignedIngredients = ingredients - associations.keys
 
+        val associationsSet = associations.values.toSet()
         val (ingredient, possibleAllergen) = notAssignedIngredients
-            .map { it to ingredientMightContain[it]!! - associations.values }
+            .map { it to ingredientMightContain[it]!! - associationsSet }
             .minByOrNull { it.second.size }!!
 
         val solution = possibleAllergen.filter { a -> allergenCouldBeIn[a]!!.all { ingredient in it } } + null

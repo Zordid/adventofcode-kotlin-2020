@@ -16,7 +16,7 @@ class Day07 : Day(7, title = "Handy Haversacks") {
     override fun part2() = "shiny gold".countContains()
 
     private fun String.countContains(): Int =
-        rules[this]?.entries?.sumBy { (color, count) -> count + count * color.countContains() } ?: 0
+        rules[this]?.entries?.sumOf { (color, count) -> count + count * color.countContains() } ?: 0
 
 }
 

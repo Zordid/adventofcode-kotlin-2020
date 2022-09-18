@@ -19,3 +19,20 @@ fun <T> conwaySequence(
     }
 
 fun <T> Grid<T>.copyMutable() = List(this.size) { this[it].toMutableList() }
+
+fun conwaySequence(
+    start: Set<Point>,
+    ruleAlive: (p: Point, alive: Set<Point>) -> Boolean,
+    ruleDead: (p: Point, alive: Set<Point>) -> Boolean
+): Sequence<Set<Point>> =
+    generateSequence(start) { prevGeneration ->
+        val area = prevGeneration.boundingArea()?.grow()
+        val nextGeneration = mutableSetOf<Point>()
+        area?.forEach { p ->
+            when (p in prevGeneration) {
+                true -> if (ruleAlive(p, prevGeneration)) nextGeneration += p
+                false -> if (ruleDead(p, prevGeneration)) nextGeneration += p
+            }
+        }
+        if (nextGeneration.isNotEmpty() && nextGeneration != prevGeneration) nextGeneration else null
+    }
