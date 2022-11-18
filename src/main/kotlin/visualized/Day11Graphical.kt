@@ -12,15 +12,15 @@ class Day11Graphical(part: Int) : PixelGameEngine() {
         if (part == 1) day11.sequencePart1().iterator() else day11.sequencePart2().iterator()
 
     init {
-        construct(area.width, area.height, 5, 5, "${day11.title} - Part $part")
-        limitFps = 10
+        construct(area.width, area.height, 5, 5, "${day11.title}-$part")
+        limitFps = 25
     }
 
     override fun isActive() = generations.hasNext()
 
     override fun onUpdate(elapsedTime: Long, frame: Long) {
         val map = generations.next()
-        appInfo = "generation #$frame"
+        appInfo = "gen #$frame"
         map.forArea { p, v ->
             when (v) {
                 Day11.EMPTY -> draw(p.x, p.y, Color.GREEN)
@@ -28,7 +28,7 @@ class Day11Graphical(part: Int) : PixelGameEngine() {
             }
         }
         if (frame == 0L)
-            sleep(3000)
+            hold(3000)
     }
 
 }

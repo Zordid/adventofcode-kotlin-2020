@@ -12,10 +12,10 @@ import kotlin.math.roundToInt
 import kotlin.system.measureTimeMillis
 
 /**
- * # PixelGameEngine
+ * PixelGameEngine
  *
  * An absolutely simple and rudimentary engine to quickly draw rough, pixelized things on screen. Good for demos,
- * little games, mazes, etc.
+ * little games, mazes, etc. Inspired by olcPixelGameEngine for C++!
  *
  * The displays a Swing window of defined size and runs in an endless game loop, allowing your code to act
  * directly before start and within each iteration of the game loop.
@@ -23,34 +23,63 @@ import kotlin.system.measureTimeMillis
  * Usage:
  * Derive from this abstract class and overwrite the methods [onCreate] and [onUpdate].
  *
+ * Version history:
+ * V2.0 - 17/11/2022 improve repainting only the dirty area
+ * V2.1 - 18/11/2022 add triangle functions, add frame sequence builder, fixed refresh
+ *
  */
 abstract class PixelGameEngine {
 
     private inner class GamePanel(val pixelWidth: Int, val pixelHeight: Int) : JPanel() {
 
+        fun refresh() = repaint()
+
+        fun refresh(xL: Int, yL: Int, xH: Int, yH: Int) {
+            if (xL in 0 until screenWidth)
+                repaint(xL * pixelWidth, yL * pixelHeight, (xH - xL + 1) * pixelWidth, (yH - yL + 1) * pixelHeight)
+        }
+
         override fun paint(g: Graphics) {
             super.paint(g)
-            var p = 0
             val stableCopy = displayBuffer.copyOf()
-            for (y in 0 until screenHeight) {
-                for (x in 0 until screenWidth) {
-                    g.color = stableCopy[p]
-                    g.fillRect(x * pixelWidth, y * pixelHeight, pixelWidth, pixelHeight)
-                    p++
+            var y = g.clipBounds.y / pixelHeight
+            val startX = g.clipBounds.x / pixelWidth
+            val endY =
+                ((g.clipBounds.y + g.clipBounds.height) / pixelHeight).coerceAtMost(screenHeight)
+            val endX =
+                ((g.clipBounds.x + g.clipBounds.width) / pixelWidth).coerceAtMost(screenWidth)
+            //println(g.clipBounds)
+            //println("$startX $y - $endX $endY (max: $screenWidth $screenHeight)")
+            while (y < endY) {
+                var x = startX
+                var p = y * screenWidth + x
+                while (x < endX) {
+                    val color = stableCopy[p++]
+                    var length = 1
+                    while (x + length < endX && stableCopy[p] == color) {
+                        p++
+                        length++
+                    }
+                    if (color != Color.BLACK) {
+                        g.color = color
+                        g.fillRect(x * pixelWidth, y * pixelHeight, pixelWidth * length, pixelHeight)
+                    }
+                    x += length
                 }
+                y++
             }
         }
 
     }
 
     private var appName = ""
-    var limitFps: Int? = null
+    var limitFps: Int = Int.MAX_VALUE
         set(value) {
             field = value
-            millisPerFrame = value?.let { (1000.0 / it).toLong() }
+            millisPerFrame = (1000.0 / value).toLong()
         }
-    private var millisPerFrame: Long? = null
-    var appInfo = ""
+    private var millisPerFrame: Long = 0
+    var appInfo: Any = ""
     lateinit var frame: JFrame
     var screenWidth = 0
         private set
@@ -61,11 +90,27 @@ abstract class PixelGameEngine {
     private lateinit var buffer: Array<Color>
     private lateinit var panel: GamePanel
 
+    private var dirtyXLow = Int.MAX_VALUE
+    private var dirtyYLow = Int.MAX_VALUE
+    private var dirtyXHigh = Int.MIN_VALUE
+    private var dirtyYHigh = Int.MIN_VALUE
+
+    init {
+        limitFps = 50
+    }
+
+    private fun resetDirty() {
+        dirtyXLow = Int.MAX_VALUE
+        dirtyYLow = Int.MAX_VALUE
+        dirtyXHigh = Int.MIN_VALUE
+        dirtyYHigh = Int.MIN_VALUE
+    }
+
     fun construct(
         screenWidth: Int,
         screenHeight: Int,
-        pixelWidth: Int,
-        pixelHeight: Int,
+        pixelWidth: Int = 1,
+        pixelHeight: Int = 1,
         appName: String = "PixelGameEngine",
     ) {
         require(screenWidth > 0 && screenHeight > 0) { "Unsupported dimensions: $screenWidth x $screenHeight" }
@@ -78,6 +123,7 @@ abstract class PixelGameEngine {
 
         this.appName = appName
         panel = GamePanel(pixelWidth, pixelHeight)
+        panel.background = Color.BLACK
         frame = JFrame()
         with(frame) {
             updateTitle("initialized")
@@ -99,7 +145,7 @@ abstract class PixelGameEngine {
     }
 
     private var halted = false
-    var hold = 0L
+    private var hold = 0L
 
     open fun isActive() = true
 
@@ -108,40 +154,51 @@ abstract class PixelGameEngine {
         panel.repaint()
         val startTime = System.currentTimeMillis()
         var frame = 0L
+
+        var holdCurrentFrame = 0L
+
         while (!halted && isActive()) {
             var time = measureTimeMillis {
-                onUpdate(System.currentTimeMillis() - startTime, frame++)
-                displayBuffer = buffer
+                resetDirty()
                 buffer = buffer.copyOf()
-                panel.repaint()
-                if (hold > 0L) {
-                    sleep(hold)
-                    hold = 0L
-                }
+                onUpdate(System.currentTimeMillis() - startTime, frame++)
             }
-            millisPerFrame?.let {
-                val sleepTime = (it - time).coerceAtLeast(0)
-                sleep(sleepTime)
-                time += sleepTime
+            val fillTime = (millisPerFrame - time).coerceAtLeast(holdCurrentFrame)
+            if (fillTime > 0) {
+                holdCurrentFrame = 0
+                Thread.sleep(fillTime)
+                time += fillTime
             }
+            displayBuffer = buffer
+            panel.refresh(dirtyXLow, dirtyYLow, dirtyXHigh, dirtyYHigh)
             updateTitle(1000.0 / time)
+            if (hold > 0) {
+                holdCurrentFrame = hold
+                hold = 0
+            }
         }
-        onStop(System.currentTimeMillis() - startTime, frame - 1)
+        onStop(System.currentTimeMillis() - startTime, frame)
+        panel.refresh()
         updateTitle("stopped")
-        while (true) sleep(1000)
+        while (true) Thread.sleep(10_000)
     }
 
     /**
      * Draws a pixel on the screen in the defined color.
+     *
      * @param x the x coordinate
      * @param y the y coordinate
      * @param color the color to draw
      */
     @JvmOverloads
     fun draw(x: Int, y: Int, color: Color = Color.WHITE) {
-        if (x in 0 until screenWidth && y in 0 until screenHeight) {
-            val pos = y * screenWidth + x
+        val pos = y * screenWidth + x
+        if (x in 0 until screenWidth && y in 0 until screenHeight && buffer[pos] != color) {
             buffer[pos] = color
+            if (dirtyXLow > x) dirtyXLow = x
+            if (dirtyXHigh < x) dirtyXHigh = x
+            if (dirtyYLow > y) dirtyYLow = y
+            if (dirtyYHigh < y) dirtyYHigh = y
         }
     }
 
@@ -169,10 +226,10 @@ abstract class PixelGameEngine {
 
         if (dx == 0) {
             if (y2 < y1)
-                for (y in y2..y1) {
+                for (y in y2.coerceAtLeast(0)..y1.coerceAtMost(screenHeight - 1)) {
                     if (rol()) draw(x1, y, color)
                 } else {
-                for (y in y1..y2)
+                for (y in y1.coerceAtLeast(0)..y2.coerceAtMost(screenHeight - 1))
                     if (rol()) draw(x1, y, color)
             }
             return
@@ -180,10 +237,10 @@ abstract class PixelGameEngine {
 
         if (dy == 0) {
             if (x2 < x1)
-                for (x in x2..x1) {
+                for (x in x2.coerceAtLeast(0)..x1.coerceAtMost(screenWidth - 1)) {
                     if (rol()) draw(x, y1, color)
                 } else {
-                for (x in x1..x2)
+                for (x in x1.coerceAtLeast(0)..x2.coerceAtMost(screenWidth - 1))
                     if (rol()) draw(x, y1, color)
             }
             return
@@ -247,6 +304,16 @@ abstract class PixelGameEngine {
         }
     }
 
+    /**
+     * Draws a rectangle on the screen in the defined color using the given pattern.
+     *
+     * @param x the top left corner's x coordinate
+     * @param y the top left corner's y coordinate
+     * @param width the width of the rectangle
+     * @param height the height of the rectangle
+     * @param color the color to use
+     * @param pattern the pattern to use
+     */
     @JvmOverloads
     fun drawRect(x: Int, y: Int, width: Int, height: Int, color: Color = Color.WHITE, pattern: Long = 0xFFFFFFFF) {
         drawLine(x, y, x + width - 1, y, color, pattern)
@@ -255,44 +322,78 @@ abstract class PixelGameEngine {
         drawLine(x, y + height - 1, x, y, color, pattern)
     }
 
+    /**
+     * Fills a rectangle on the screen in the defined color using the given pattern.
+     *
+     * @param x the top left corner's x coordinate
+     * @param y the top left corner's y coordinate
+     * @param width the width of the rectangle
+     * @param height the height of the rectangle
+     * @param color the color to use for fill
+     */
     @JvmOverloads
     fun fillRect(x: Int, y: Int, width: Int, height: Int, color: Color = Color.WHITE) {
-        var x1 = x
-        var y1 = y
-        var x2 = x + width - 1
-        var y2 = y + height - 1
-
-        if (x1 < 0) x1 = 0
-        if (x1 >= screenWidth) x1 = screenWidth
-        if (y1 < 0) y1 = 0
-        if (y1 >= screenHeight) y1 = screenHeight
-
-        if (x2 < 0) x2 = 0
-        if (x2 >= screenWidth) x2 = screenWidth
-        if (y2 < 0) y2 = 0
-        if (y2 >= screenHeight) y2 = screenHeight
+        val x1 = x.coerceIn(0, screenWidth - 1)
+        val y1 = y.coerceIn(0, screenHeight - 1)
+        val x2 = (x + width - 1).coerceIn(0, screenWidth - 1)
+        val y2 = (y + height - 1).coerceIn(0, screenHeight - 1)
 
         for (i in x1..x2)
             for (j in y1..y2)
                 draw(i, j, color)
     }
 
+    /**
+     * Draws a triangle on the screen in the defined color using the given pattern.
+     *
+     * @param x1 first vertex's x coordinate
+     * @param y1 first vertex's y coordinate
+     * @param x2 second vertex's x coordinate
+     * @param y2 second vertex's y coordinate
+     * @param x3 third vertex's x coordinate
+     * @param y3 third vertex's y coordinate
+     */
     @JvmOverloads
-    fun drawCircle(x: Int, y: Int, radius: Int, color: Color = Color.WHITE, mask: Int = 0xFF) {
+    fun drawTriangle(
+        x1: Int,
+        y1: Int,
+        x2: Int,
+        y2: Int,
+        x3: Int,
+        y3: Int,
+        color: Color = Color.WHITE,
+        pattern: Long = 0xFFFFFFFF
+    ) {
+        drawLine(x1, y1, x2, y2, color, pattern)
+        drawLine(x2, y2, x3, y3, color, pattern)
+        drawLine(x3, y3, x1, y1, color, pattern)
+    }
+
+    /**
+     * Draws a circle on the screen in the defined color using the given pattern.
+     *
+     * @param x the center's x coordinate
+     * @param y the center's y coordinate
+     * @param radius the radius of the circle
+     * @param color the color to use
+     * @param pattern the pattern to use
+     */
+    @JvmOverloads
+    fun drawCircle(x: Int, y: Int, radius: Int, color: Color = Color.WHITE, pattern: Int = 0xFF) {
         var x0 = 0
         var y0 = radius
         var d = 3 - 2 * radius
         if (radius == 0) return
 
         while (y0 >= x0) {
-            if (mask and 0x01 != 0) draw(x + x0, y - y0, color)
-            if (mask and 0x02 != 0) draw(x + y0, y - x0, color)
-            if (mask and 0x04 != 0) draw(x + y0, y + x0, color)
-            if (mask and 0x08 != 0) draw(x + x0, y + y0, color)
-            if (mask and 0x10 != 0) draw(x - x0, y + y0, color)
-            if (mask and 0x20 != 0) draw(x - y0, y + x0, color)
-            if (mask and 0x40 != 0) draw(x - y0, y - x0, color)
-            if (mask and 0x80 != 0) draw(x - x0, y - y0, color)
+            if (pattern and 0x01 != 0) draw(x + x0, y - y0, color)
+            if (pattern and 0x02 != 0) draw(x + y0, y - x0, color)
+            if (pattern and 0x04 != 0) draw(x + y0, y + x0, color)
+            if (pattern and 0x08 != 0) draw(x + x0, y + y0, color)
+            if (pattern and 0x10 != 0) draw(x - x0, y + y0, color)
+            if (pattern and 0x20 != 0) draw(x - y0, y + x0, color)
+            if (pattern and 0x40 != 0) draw(x - y0, y - x0, color)
+            if (pattern and 0x80 != 0) draw(x - x0, y - y0, color)
             d += if (d < 0)
                 4 * x0++ + 6
             else
@@ -300,6 +401,14 @@ abstract class PixelGameEngine {
         }
     }
 
+    /**
+     * Fills a circle on the screen in the defined color.
+     *
+     * @param x the center's x coordinate
+     * @param y the center's y coordinate
+     * @param radius the radius of the circle
+     * @param color the color to use
+     */
     @JvmOverloads
     fun fillCircle(x: Int, y: Int, radius: Int, color: Color = Color.WHITE) {
         var x0 = 0
@@ -324,18 +433,35 @@ abstract class PixelGameEngine {
         }
     }
 
+    /**
+     * Clears the buffer using the given color.
+     *
+     * @param color the color to clear with
+     */
     @JvmOverloads
-    fun clear(color: Color = Color.BLACK) = buffer.fill(color)
+    fun clear(color: Color = Color.BLACK) {
+        dirtyXLow = 0
+        dirtyYLow = 0
+        dirtyXHigh = screenWidth - 1
+        dirtyYHigh = screenHeight - 1
+        buffer.fill(color)
+    }
 
     /**
      * Sleeps for [millis] milliseconds. Can be used to slow down the animation in [onUpdate].
      */
     fun sleep(millis: Long) = Thread.sleep(millis)
 
+    /**
+     * After updating the screen, the current frame will be shown at least the given amount of time.
+     */
     fun hold(millis: Long) {
         hold = millis
     }
 
+    /**
+     * Stops the frame updates. [onUpdate] will not be called anymore.
+     */
     fun stop() {
         halted = true
     }
@@ -361,6 +487,9 @@ abstract class PixelGameEngine {
         sleep(1000)
     }
 
+    /**
+     * Called once right before stopping
+     */
     open fun onStop(elapsedTime: Long, frame: Long) {
         // nop
     }
@@ -373,6 +502,13 @@ abstract class PixelGameEngine {
         frame.title = "$appName - $appInfo - $state"
     }
 
+    fun Iterator<Unit>.use() {
+        val hasNext = hasNext()
+        if (!hasNext) stop() else {
+            next()
+        }
+    }
+
     companion object {
         fun gradientColor(from: Color, to: Color, percent: Float): Color {
             val resultRed: Float = from.red + percent * (to.red - from.red)
@@ -383,6 +519,10 @@ abstract class PixelGameEngine {
 
         fun createGradient(from: Color, to: Color, steps: Int): List<Color> =
             (0 until steps).map { gradientColor(from, to, it / (steps - 1).toFloat()) }
+
+        suspend fun SequenceScope<Unit>.frame() = yield(Unit)
+
+        fun frameSequence(block: suspend SequenceScope<Unit>.() -> Unit) = sequence(block).iterator()
     }
 
 }

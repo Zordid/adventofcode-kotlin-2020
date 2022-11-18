@@ -20,7 +20,7 @@ class Day12Graphical : PixelGameEngine() {
     val transpose: Point
 
     init {
-        construct(area.width, area.height, 1, 1, day12.title)
+        construct(area.width, area.height, appName = day12.title)
         transpose = -area.first.x to -area.first.y
         limitFps = 100
         println(area)
