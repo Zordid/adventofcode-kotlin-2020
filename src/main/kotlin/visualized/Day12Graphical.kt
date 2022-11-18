@@ -17,15 +17,7 @@ class Day12Graphical : PixelGameEngine() {
     //    private val shipMovement = path2.map { Triple(it.first, Direction4.NORTH, it.second) }
     private val area = shipMovement.map { it.first }.boundingArea()!!.grow(10)
 
-    val transpose: Point
-
-    init {
-        construct(area.width, area.height, appName = day12.title)
-        transpose = -area.first.x to -area.first.y
-        limitFps = 100
-        println(area)
-        println(transpose)
-    }
+    val transpose: Point = -area.first.x to -area.first.y
 
     var current = 1
 
@@ -34,6 +26,13 @@ class Day12Graphical : PixelGameEngine() {
     var shipOnScreen: Triple<Point, Direction, Point>? = null
     var currentTarget = shipMovement[0]
     var lastPoints: LinkedList<Point> = LinkedList()
+
+    override fun onCreate() {
+        construct(area.width, area.height, appName = day12.title)
+        limitFps = 100
+        println(area)
+        println(transpose)
+    }
 
     override fun onUpdate(elapsedTime: Long, frame: Long) {
         shipOnScreen?.let { drawShip(it, Color.BLACK) }

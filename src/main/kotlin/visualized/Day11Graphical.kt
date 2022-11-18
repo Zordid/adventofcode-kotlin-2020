@@ -12,7 +12,7 @@ class Day11Graphical(part: Int) : PixelGameEngine() {
         if (part == 1) day11.sequencePart1().iterator() else day11.sequencePart2().iterator()
 
     init {
-        construct(area.width, area.height, 5, 5, "${day11.title}-$part")
+        construct(area.width, area.height, 5, appName = "${day11.title}-$part")
         limitFps = 25
     }
 
